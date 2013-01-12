@@ -15,10 +15,10 @@ import org.cflgraph.cfl.NormalCFL;
 import org.cflgraph.cfl.NormalCFL.PairProduction;
 import org.cflgraph.cfl.NormalCFL.SingleProduction;
 import org.cflgraph.graph.CFLGraph.Vertex;
-import org.cflpath.utility.Utility.Heap;
-import org.cflpath.utility.Utility.MultivalueMap;
-import org.cflpath.utility.Utility.Pair;
-import org.cflpath.utility.Utility.Triple;
+import org.cflgraph.utility.Utility.Heap;
+import org.cflgraph.utility.Utility.MultivalueMap;
+import org.cflgraph.utility.Utility.Pair;
+import org.cflgraph.utility.Utility.Triple;
 
 public class CFLGraph extends HashSet<Vertex> {
 	private static final long serialVersionUID = 1L;

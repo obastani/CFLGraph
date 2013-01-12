@@ -1,4 +1,4 @@
-package org.cflpath.utility;
+package org.cflgraph.utility;
 
 import java.util.ArrayList;
 import java.util.HashMap;

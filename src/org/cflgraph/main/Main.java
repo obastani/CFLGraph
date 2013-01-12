@@ -1,4 +1,4 @@
-package org.cflpath.main;
+package org.cflgraph.main;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -11,7 +11,7 @@ import org.cflgraph.graph.CFLGraph.GraphElement;
 import org.cflgraph.graph.CFLGraph.Path;
 import org.cflgraph.graph.CFLGraph.Vertex;
 import org.cflgraph.graph.FlowsToGraph;
-import org.cflpath.utility.Utility.MultivalueMap;
+import org.cflgraph.utility.Utility.MultivalueMap;
 
 public class Main {
 	

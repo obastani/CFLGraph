@@ -3,7 +3,7 @@ package org.cflgraph.cfl;
 import java.util.Set;
 
 import org.cflgraph.cfl.Element.Variable;
-import org.cflpath.utility.Utility.MultivalueMap;
+import org.cflgraph.utility.Utility.MultivalueMap;
 
 public class NormalCFL {
 	public static class SingleProduction {
