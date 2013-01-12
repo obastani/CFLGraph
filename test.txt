@@ -1,0 +1,12 @@
+o1 x new
+o2 z new
+z y store_f
+x y assign
+x w assign
+w v load_f
+
+$SOURCE foo[1] new
+foo[ret] $SINK load_f
+
+foo[1] foo stubarg
+foo[ret] foo stubret

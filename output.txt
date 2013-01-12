@@ -1,0 +1,9 @@
+flowsTo, weight: 0
+flowsToRight, weight: 0
+flowsTo, weight: 0
+flowsTo, weight: 0
+flowsTo, weight: 0
+flowsToRight, weight: 0
+flowsToRight, weight: 0
+flowsToRight, weight: 0
+flowsToRight, weight: 0

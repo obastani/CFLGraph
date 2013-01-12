@@ -1,0 +1,13 @@
+flowsTo($SOURCE,foo[ret]), weight: 0.0
+flowsTo(o1,y), weight: 0.0
+flowsTo($SOURCE,$SINK), weight: 1.0
+flowsTo(obj_foo,temp_foo), weight: 0.0
+flowsTo(obj_foo,foo[ret]), weight: 0.0
+flowsTo($SOURCE,temp_foo), weight: 0.0
+flowsTo(obj_foo,foo[1]), weight: 0.0
+flowsTo($SOURCE,foo[1]), weight: 0.0
+flowsTo(o2,v), weight: 0.0
+flowsTo(o1,w), weight: 0.0
+flowsTo(o2,z), weight: 0.0
+flowsTo(o1,x), weight: 0.0
+flowsTo(obj_foo,$SINK), weight: 1.0

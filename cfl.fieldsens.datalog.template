@@ -1,0 +1,61 @@
+V @SIZE:V@
+SRC @SIZE:SRC@
+SINK @SIZE:SINK@
+
+## INPUT RELATIONS ============================================================
+
+assign(r:V,l:V) input
+store_$F(r:V,l:V) input
+load_$F(r:V,l:V) input
+
+srcFlow(src:SRC,v:V) input
+sinkFlow(v:V,sink:SINK) input
+taintPassThrough(r:V,l:V) input
+
+## OUTPUT RELATIONS ===========================================================
+
+alias(p:V,q:V) printtuples
+
+# Taint propagation
+
+taintFlow(r:V,l:V)
+taintFlowMatched(src:SRC,sink:SINK) printtuples
+
+## RULES ======================================================================
+
+# alias rules
+
+alias(v1,v4) :- store_$F(v1,v2), alias(v2,v3), load_$F(v3,v4).
+alias(v2,v4) :- load_$F(v1,v2), alias(v1,v3), load_$F(v3,v4).
+alias(v1,v2) :- assign(v1,v2).
+
+alias(v1,v2) :- v1=v2.
+alias(v1,v2) :- alias(v2,v1).
+alias(v1,v2) :- alias(v1,v3), alias(v3,v2).
+
+# taint propagation rules
+
+taintFlow(v1,v2) :- taintPassThrough(v1,v2).
+taintFlow(v1,v4) :- taintFlow(v1,v2), alias(v2,v3), taintFlow(v3,v4).
+taintFlowMatched(src,sink) :- srcFlow(src,v1), alias(v1,v2), taintFlow(v2,v3), alias(v3,v4), sinkFlow(v4,sink).
+taintFlowMatched(src,sink) :- srcFlow(src,v1), alias(v1,v2), sinkFlow(v2,sink).
+
+## FACTS ======================================================================
+
+# Basic program facts
+
+@DUMP:cfl_assign(%V1,%V2):assign("v%V1","v%V2").@
+@DUMP:cfl_store(%F,%V1,%V2):store_%F("v%V1","v%V2").@
+@DUMP:cfl_load(%F,%V1,%V2):load_%F("v%V1","v%V2").@
+@DUMP:cfl_param(%I,%V1,%V2):assign("v%V1","v%V2").@
+@DUMP:cfl_ret(%I,%V1,%V2):assign("v%V1","v%V2").@
+
+# Flow annotations
+
+@DUMP:cfl_srcFlow(%SRC,%V):srcFlow("src%SRC","v%V").@
+@DUMP:cfl_sinkFlow(%V,%SINK):sinkFlow("v%V","sink%SINK").@
+@DUMP:cfl_passThrough(%V1,%V2):taintPassThrough("v%V1","v%V2").@
+
+## QUERIES ====================================================================
+
+# TODO: What to ask? We (probably) want to get all the calculated tuples.
