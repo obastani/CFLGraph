@@ -1,4 +1,4 @@
-package org.cflgraph.graph;
+package org.cflgraph.cfl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,13 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cflgraph.cfl.Element;
+import org.cflgraph.cfl.CFLGraph.Vertex;
 import org.cflgraph.cfl.Element.Terminal;
 import org.cflgraph.cfl.Element.Variable;
-import org.cflgraph.cfl.NormalCFL;
 import org.cflgraph.cfl.NormalCFL.PairProduction;
 import org.cflgraph.cfl.NormalCFL.SingleProduction;
-import org.cflgraph.graph.CFLGraph.Vertex;
 import org.cflgraph.utility.Utility.Heap;
 import org.cflgraph.utility.Utility.MultivalueMap;
 import org.cflgraph.utility.Utility.Pair;
@@ -243,12 +241,14 @@ public class CFLGraph extends HashSet<Vertex> {
 		    minGraphElementPathsBySink.add(new Pair<Vertex,Element>(minElement.getSink(),minElement.getElement()), new Pair<Vertex,Path>(minElement.getSource(),minPath));
 		    
 		    // TODO: fix temporary hack
-		    if(minElement.getElement().equals(new Variable("flowsTo")) || minElement.getElement().equals(new Variable("label"))) {
+		    if(minElement.getElement().equals(new Variable("flowsTo"))) {// || minElement.getElement().equals(new Variable("label"))) {
 		    	GraphElement barElement = new GraphElement(minElement.getSink(), minElement.getSource(), new Variable(minElement.getElement().getName() + "Bar"));
 		    	Path barPath = minPath.reverse();
-			    minGraphElementPaths.put(barElement, barPath);
-			    minGraphElementPathsBySource.add(new Pair<Vertex,Element>(barElement.getSource(),barElement.getElement()), new Pair<Vertex,Path>(barElement.getSink(),barPath));
-			    minGraphElementPathsBySink.add(new Pair<Vertex,Element>(barElement.getSink(),barElement.getElement()), new Pair<Vertex,Path>(barElement.getSource(),barPath));		    	
+			    //minGraphElementPaths.put(barElement, barPath);
+			    //minGraphElementPathsBySource.add(new Pair<Vertex,Element>(barElement.getSource(),barElement.getElement()), new Pair<Vertex,Path>(barElement.getSink(),barPath));
+			    //minGraphElementPathsBySink.add(new Pair<Vertex,Element>(barElement.getSink(),barElement.getElement()), new Pair<Vertex,Path>(barElement.getSource(),barPath));
+		    	curMinGraphElementQueue.update(barElement, barPath.getWeight());
+		    	curMinGraphElementPaths.put(barElement, barPath);
 		    }
 		    
 		    // step 2c: update the minimum path for all single productions using that element

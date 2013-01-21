@@ -1,12 +1,12 @@
-package org.cflgraph.graph;
+package org.cflgraph.cfl;
 
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.cflgraph.cfl.Element.Terminal;
 import org.cflgraph.cfl.Element.Variable;
-import org.cflgraph.cfl.NormalCFL;
 import org.cflgraph.cfl.NormalCFL.PairProduction;
 import org.cflgraph.cfl.NormalCFL.SingleProduction;
 
@@ -28,14 +28,15 @@ public class FlowsToGraph extends CFLGraph {
 	private Terminal load_(String field) { return new Terminal("load_" + field); }
 	
 	// terminals for annotated flows
-	private Terminal flows = new Terminal("flows");
+	private Terminal passThrough = new Terminal("passThrough");
+	//private Terminal passThrough = assign;
 	private Terminal source = new Terminal("source");
 	private Terminal sink = new Terminal("sink");
 	
 	// variables
 	
 	private Variable label = new Variable("label");
-	private Variable labelBar = new Variable("label");
+	//private Variable labelBar = new Variable("label");
 	
 	private Variable flowsTo = new Variable("flowsTo");
 	private Variable flowsToBar = new Variable("flowsToBar");
@@ -83,6 +84,18 @@ public class FlowsToGraph extends CFLGraph {
 		return this.store_(field);
 	}
 	
+	public Terminal getSource() {
+		return this.source;
+	}
+	
+	public Terminal getSink() {
+		return this.sink;
+	}
+	
+	public Terminal getPassThrough() {
+		return this.passThrough;
+	}
+	
 	public void addStubMethod(Set<Vertex> args, Vertex ret, String methodSignature) {
 		/*
 		// temporary variable in the method
@@ -107,13 +120,13 @@ public class FlowsToGraph extends CFLGraph {
 		for(Vertex firstArg : args) {
 			for(Vertex secondArg : args) {
 				if(!firstArg.equals(secondArg)) {
-					super.addEdge(firstArg, secondArg, this.flows, 1);
+					super.addEdge(firstArg, secondArg, this.passThrough, 1);
 				}
 			}
 		}
 		if(ret != null) {
 			for(Vertex arg : args) {
-				super.addEdge(arg, ret, this.flows, 1);
+				super.addEdge(arg, ret, this.passThrough, 1);
 			}
 		}
 	}
@@ -144,26 +157,38 @@ public class FlowsToGraph extends CFLGraph {
 		
 		for(String field : this.fields) {
 			// add production flowsToRightRight_f -> alias load_f
-			normalCfl.add(new PairProduction(this.flowsToRightRight_(field), this.alias, this.load_(field)));
+			//normalCfl.add(new PairProduction(this.flowsToRightRight_(field), this.alias, this.load_(field)));
 			
 			// add production flowsToRight -> store_f flowsToRight_f
-			normalCfl.add(new PairProduction(this.flowsToRight, this.store_(field), this.flowsToRightRight_(field)));
+			//normalCfl.add(new PairProduction(this.flowsToRight, this.store_(field), this.flowsToRightRight_(field)));
+			normalCfl.add(flowsToRight, this.store_(field), this.alias, this.load_(field));
 			
 			// add production flowsToRight -> store_* flowsToRight_f
 			//normalCfl.add(new PairProduction(this.flowsToRight, this.store_star, this.flowsToRightRight_(field)));
 			
 			// add production flowsToRight -> store_f flowsToRight_*
 			//normalCfl.add(new PairProduction(this.flowsToRight, this.store_(field), this.flowsToRightRight_star));
-
-			// annotated flows
-			// label(l,o2) -> label(l,o1), flowsTo(o1,p), flow(p,q), flowsTo(q,o1), labelBar(o1,l)
-			normalCfl.add(this.label, this.label, this.flowsTo, this.flows, this.flowsTo, this.labelBar);
-			
-			// label(l,o) -> source(l,v), flowsToBar(v,o)
-			normalCfl.add(this.label, this.source, this.flowsToBar);
-			
-			// sourceSinkFlow(l1,l2) -> label(l1,o), flowsTo(o,v), sink(v,l2)
-			normalCfl.add(this.sourceSinkFlow, this.label, this.flowsTo, this.sink);
+		}
+		
+		// annotated flows
+		// label(l,o2) -> label(l,o1), flowsTo(o1,p), flow(p,q), flowsTo(q,o1), labelBar(o1,l)
+		//normalCfl.add(this.label, this.label, this.flowsTo, this.passThrough, this.flowsToBar, this.labelBar);
+		
+		// label(l,o2) -> label(l,o1), flowsTo(o1,p), passThrough(p,q), flowsToBar(q,o2)
+		normalCfl.add(this.label, this.label, this.flowsTo, this.passThrough, this.flowsToBar);
+		
+		// label(l,o) -> source(l,v), flowsToBar(v,o)
+		normalCfl.add(this.label, this.source, this.flowsToBar);
+		
+		// sourceSinkFlow(l1,l2) -> label(l1,o), flowsTo(o,v), sink(v,l2)
+		normalCfl.add(this.sourceSinkFlow, this.label, this.flowsTo, this.sink);
+		
+		try {
+			PrintWriter pw = new PrintWriter("cfl.txt");
+			pw.println(normalCfl);
+			pw.close();
+		} catch(Exception e) {
+			System.out.println("Error printing cfl to file.");
 		}
 		
 		return normalCfl;
