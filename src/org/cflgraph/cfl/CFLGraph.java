@@ -241,12 +241,9 @@ public class CFLGraph extends HashSet<Vertex> {
 		    minGraphElementPathsBySink.add(new Pair<Vertex,Element>(minElement.getSink(),minElement.getElement()), new Pair<Vertex,Path>(minElement.getSource(),minPath));
 		    
 		    // TODO: fix temporary hack
-		    if(minElement.getElement().equals(new Variable("flowsTo"))) {// || minElement.getElement().equals(new Variable("label"))) {
+		    if(minElement.getElement().equals(new Variable("flowsTo"))) {
 		    	GraphElement barElement = new GraphElement(minElement.getSink(), minElement.getSource(), new Variable(minElement.getElement().getName() + "Bar"));
 		    	Path barPath = minPath.reverse();
-			    //minGraphElementPaths.put(barElement, barPath);
-			    //minGraphElementPathsBySource.add(new Pair<Vertex,Element>(barElement.getSource(),barElement.getElement()), new Pair<Vertex,Path>(barElement.getSink(),barPath));
-			    //minGraphElementPathsBySink.add(new Pair<Vertex,Element>(barElement.getSink(),barElement.getElement()), new Pair<Vertex,Path>(barElement.getSource(),barPath));
 		    	curMinGraphElementQueue.update(barElement, barPath.getWeight());
 		    	curMinGraphElementPaths.put(barElement, barPath);
 		    }

@@ -3,7 +3,6 @@ package org.cflgraph.main;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,10 +66,6 @@ public class Main {
 			graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
 		}
 		
-		PrintWriter pw = new PrintWriter("graph.txt");
-		pw.println(graph);
-		pw.close();
-		
 		return graph;
 	}
 	
@@ -78,7 +73,7 @@ public class Main {
 		long time = System.currentTimeMillis();
 		try {
 			//FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("test.reps")));
-			FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("lesson1_flow.reps")));
+			FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("lesson1.reps")));
 			
 			Map<GraphElement,Path> shortestPaths = cflGraph.getShortestPaths();
 			for(Map.Entry<GraphElement,Path> entry : shortestPaths.entrySet()) {
