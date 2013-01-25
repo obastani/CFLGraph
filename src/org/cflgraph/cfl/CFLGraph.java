@@ -129,7 +129,6 @@ public class CFLGraph extends HashSet<Vertex> {
 		}
 		
 		public Path reverse() {
-			
 			Path reversePath = null;
 			Terminal prevTerminal = null;
 			
@@ -143,12 +142,20 @@ public class CFLGraph extends HashSet<Vertex> {
 				} else {
 					reversePath.add(new Pair<Vertex,Terminal>(pair.getX(), prevTerminal));
 				}
-				prevTerminal = pair.getY();
+				prevTerminal = new Terminal(pair.getY().getName() + "Bar");
 			}
-			
 			reversePath.add(new Pair<Vertex,Terminal>(this.start, prevTerminal));
-			
 			return reversePath;
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(this.start);
+			for(Pair<Vertex,Terminal> pair : this.pairs) {
+				sb.append(" " + pair.getY() + " " + pair.getX());
+			}
+			return sb.toString();
 		}
 	}
 	
@@ -264,14 +271,15 @@ public class CFLGraph extends HashSet<Vertex> {
 		    // step 2d: update the minimum path for all pair productions using that element as the first input
 		    for(PairProduction pairProduction : cfl.getPairProductionsByFirstInput(minElement.getElement())) {
 		    	for(Pair<Vertex,Path> pair : minGraphElementPathsBySource.get(new Pair<Vertex,Element>(minElement.getSink(), pairProduction.getSecondInput()))) {
-		    		Path secondPath = minGraphElementPaths.get(new GraphElement(minElement.getSink(), pair.getX(), pairProduction.getSecondInput()));
-		    		if(secondPath != null) {
+			    	Path secondPath = minGraphElementPaths.get(new GraphElement(minElement.getSink(), pair.getX(), pairProduction.getSecondInput()));
+			    	
+			    	if(secondPath != null) {
 		    			GraphElement curElement = new GraphElement(minElement.getSource(), pair.getX(), pairProduction.getTarget());
 			    		
 		    			Path curPath = curMinGraphElementPaths.get(curElement);
 		    			Path newPath = new Path(minGraphElementPaths.get(minElement), secondPath);
 		    			
-		    			if(curPath == null || newPath.getWeight() < curPath.getWeight()) {
+		    			if(curPath == null || newPath.getWeight() < curPath.getWeight()) {					    	
 		    				curMinGraphElementQueue.update(curElement, newPath.getWeight());
 		    				curMinGraphElementPaths.put(curElement, newPath);
 		    			}
@@ -296,12 +304,100 @@ public class CFLGraph extends HashSet<Vertex> {
 		    		}
 		    	}
 		    }
-
 		}
 		
 		return curMinGraphElementPaths;
 	}
 	
+	public Set<GraphElement> getProductions(NormalCFL normalCfl) {
+		LinkedList<GraphElement> workflow = new LinkedList<GraphElement>();
+		
+		Set<GraphElement> newElements = new HashSet<GraphElement>();
+		
+		Set<GraphElement> elements = new HashSet<GraphElement>();
+		MultivalueMap<Pair<Vertex,Vertex>, Element> elementsByVertices = new MultivalueMap<Pair<Vertex,Vertex>, Element>();
+		MultivalueMap<Pair<Vertex,Element>, Vertex> elementsBySource = new MultivalueMap<Pair<Vertex,Element>, Vertex>();
+		MultivalueMap<Pair<Vertex,Element>, Vertex> elementsBySink = new MultivalueMap<Pair<Vertex,Element>, Vertex>();
+		
+		for(Pair<Vertex,Vertex> pair : this.edges.keySet()) {
+			for(Terminal terminal : this.edges.get(pair)) {
+				newElements.add(new GraphElement(pair.getX(), pair.getY(), terminal));
+			}
+		}
+		
+		// add elements in set of elements to be added
+		for(GraphElement graphElement : newElements) {
+			Vertex source = graphElement.getSource();
+			Vertex sink = graphElement.getSink();
+			Element element = graphElement.getElement();
+			
+			if(!elementsByVertices.get(new Pair<Vertex,Vertex>(source, sink)).contains(element)) {
+				workflow.add(graphElement);
+				elements.add(graphElement);
+				elementsByVertices.add(new Pair<Vertex,Vertex>(source, sink), element);
+				elementsBySource.add(new Pair<Vertex,Element>(source, element), sink);
+				elementsBySink.add(new Pair<Vertex,Element>(sink,element), source);
+			}
+		}
+		newElements.clear();
+
+		int i=0;
+		while(!workflow.isEmpty()) {
+			if(i%10000 == 0) {
+				System.out.println(i);
+				System.out.println(workflow.size());
+				System.out.println();
+			}
+			i++;
+			
+			GraphElement currentElement = workflow.remove();
+			
+			Vertex source = currentElement.getSource();
+			Vertex sink = currentElement.getSink();
+			Element element = currentElement.getElement();
+			
+			// TODO: fix temporary hack
+			if(currentElement.getElement().getName().equals("flowsTo")) {
+				newElements.add(new GraphElement(sink, source, new Variable("flowsToBar")));
+			}
+
+			for(SingleProduction singleProduction : normalCfl.getSingleProductionsByInput(element)) {
+				newElements.add(new GraphElement(source, sink, singleProduction.getTarget()));
+			}
+
+			for(PairProduction pairProduction : normalCfl.getPairProductionsByFirstInput(element)) {
+				for(Vertex newSink : elementsBySource.get(new Pair<Vertex,Element>(sink, pairProduction.getSecondInput()))) {
+					newElements.add(new GraphElement(source, newSink, pairProduction.getTarget()));
+				}
+			}
+			
+			for(PairProduction pairProduction : normalCfl.getPairProductionsBySecondInput(element)) {
+				for(Vertex newSource : elementsBySink.get(new Pair<Vertex,Element>(source, pairProduction.getFirstInput()))) {
+					newElements.add(new GraphElement(newSource, sink, pairProduction.getTarget()));
+				}
+			}
+			
+			// add elements in set of elements to be added
+			for(GraphElement graphElement : newElements) {
+				Vertex newSource = graphElement.getSource();
+				Vertex newSink = graphElement.getSink();
+				Element newElement = graphElement.getElement();
+				
+				if(!elementsByVertices.get(new Pair<Vertex,Vertex>(newSource, newSink)).contains(newElement)) {
+					workflow.add(graphElement);
+					elements.add(graphElement);
+					elementsByVertices.add(new Pair<Vertex,Vertex>(newSource, newSink), newElement);
+					elementsBySource.add(new Pair<Vertex,Element>(newSource, newElement), newSink);
+					elementsBySink.add(new Pair<Vertex,Element>(newSink,newElement), newSource);
+				}
+			}
+			newElements.clear();
+		}
+		
+		return elements;
+	}
+
+
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder();

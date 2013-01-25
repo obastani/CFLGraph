@@ -33,7 +33,7 @@ public class FlowsToGraph extends CFLGraph {
 	
 	// variables
 	
-	private Variable label = new Variable("label");
+	//private Variable label = new Variable("label");
 	
 	private Variable flowsTo = new Variable("flowsTo");
 	private Variable flowsToBar = new Variable("flowsToBar");
@@ -44,6 +44,7 @@ public class FlowsToGraph extends CFLGraph {
 	
 	// variables for annotated flows
 	private Variable sourceSinkFlow = new Variable("sourceSinkFlow");
+	private Variable taints = new Variable("taints");
 	
 	// various functions
 	
@@ -160,18 +161,31 @@ public class FlowsToGraph extends CFLGraph {
 		
 		// annotated flows
 		// label(l,o2) -> label(l,o1), flowsTo(o1,p), passThrough(p,q), flowsToBar(q,o2)
-		normalCfl.add(this.label, this.label, this.flowsTo, this.passThrough, this.flowsToBar);
+		//normalCfl.add(this.label, this.label, this.flowsTo, this.passThrough, this.flowsToBar);
 		
 		// label(l,o) -> source(l,v), flowsToBar(v,o)
-		normalCfl.add(this.label, this.source, this.flowsToBar);
+		//normalCfl.add(this.label, this.source, this.flowsToBar);
 		
 		// sourceSinkFlow(l1,l2) -> label(l1,o), flowsTo(o,v), sink(v,l2)
-		normalCfl.add(this.sourceSinkFlow, this.label, this.flowsTo, this.sink);
+		//normalCfl.add(this.sourceSinkFlow, this.label, this.flowsTo, this.sink);
+		
+		// taints(l,p) -> source(l,p)
+		normalCfl.add(this.taints, this.source);
+		// taints(l,q) -> taints(l,p), alias(p,q)
+		normalCfl.add(this.taints, this.taints, this.alias);
+		// taints(l,q) -> taints(l,p), passThrough(p,q)
+		normalCfl.add(this.taints, this.taints, this.passThrough);
+		// sourceSinkFlow(l1,l2) -> taints(l1,p), sink(p,l2)
+		normalCfl.add(this.sourceSinkFlow, this.taints, this.sink);
 		
 		return normalCfl;
 	}
 
 	public Map<GraphElement,Path> getShortestPaths() {
 		return super.getShortestPaths(this.getFlowsToCfl());
+	}
+	
+	public Set<GraphElement> getProductions() {
+		return super.getProductions(this.getFlowsToCfl());
 	}
 }

@@ -3,6 +3,7 @@ package org.cflgraph.main;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,15 +73,30 @@ public class Main {
 	public static void main(String[] args) {
 		long time = System.currentTimeMillis();
 		try {
-			//FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("test.reps")));
-			FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("lesson1.reps")));
-			
+			String input = "test";
+			FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
+
 			Map<GraphElement,Path> shortestPaths = cflGraph.getShortestPaths();
+			PrintWriter pw1 = new PrintWriter("output/" + input + ".knuth");
 			for(Map.Entry<GraphElement,Path> entry : shortestPaths.entrySet()) {
 				if(entry.getKey().getElement().getName().equals("sourceSinkFlow")) {
-					System.out.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
+					pw1.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
+					pw1.println(entry.getValue());
+					pw1.println();
 				}
 			}
+			pw1.close();
+			/*
+			Set<GraphElement> elements = cflGraph.getProductions();
+			PrintWriter pw2 = new PrintWriter("output/" + input + ".reps");
+			for(GraphElement element : elements) {
+				if(element.getElement().getName().equals("sourceSinkFlow")) {
+					pw2.println(element);
+				}
+			}
+			pw2.close();
+			*/
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
