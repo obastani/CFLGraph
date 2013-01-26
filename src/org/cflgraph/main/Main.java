@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.cflgraph.cfl.CFLGraph.GraphElement;
 import org.cflgraph.cfl.CFLGraph.Path;
@@ -55,7 +56,7 @@ public class Main {
 					methodArgs.add(tokens[1], new Vertex(tokens[0]));
 					label = null;
 				} else if(tokens[2].startsWith("stubRet")) {
-					methodRet.put(tokens[1], new Vertex(tokens[0]));
+					methodRet.put(tokens[0], new Vertex(tokens[1]));
 					label = null;
 				}
 				if(label != null) {
@@ -73,9 +74,8 @@ public class Main {
 	public static void main(String[] args) {
 		long time = System.currentTimeMillis();
 		try {
-			String input = "test";
+			String input = "lesson1app_cs";
 			FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
-
 			Map<GraphElement,Path> shortestPaths = cflGraph.getShortestPaths();
 			PrintWriter pw1 = new PrintWriter("output/" + input + ".knuth");
 			for(Map.Entry<GraphElement,Path> entry : shortestPaths.entrySet()) {
@@ -96,6 +96,7 @@ public class Main {
 			}
 			pw2.close();
 			*/
+			
 			
 		} catch(Exception e) {
 			e.printStackTrace();
