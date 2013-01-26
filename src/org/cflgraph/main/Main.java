@@ -74,7 +74,7 @@ public class Main {
 	public static void main(String[] args) {
 		long time = System.currentTimeMillis();
 		try {
-			String input = "lesson1app_cs";
+			String input = "supernote_cs";
 			FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
 			Map<GraphElement,Path> shortestPaths = cflGraph.getShortestPaths();
 			PrintWriter pw1 = new PrintWriter("output/" + input + ".knuth");
