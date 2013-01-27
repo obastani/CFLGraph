@@ -131,16 +131,18 @@ public class FlowsToGraph extends CFLGraph {
 		NormalCFL normalCfl = new NormalCFL();
 
 		// add production flowsToRight -> assign
-		normalCfl.add(new SingleProduction(this.flowsToRight, this.assign));
+		//normalCfl.add(new SingleProduction(this.flowsToRight, this.assign));
+		
+		normalCfl.add(this.flowsTo, this.flowsTo, this.assign);
 		
 		// add production flowsToRight -> flowsToRight flowsToRight
-		normalCfl.add(new PairProduction(this.flowsToRight, this.flowsToRight, this.flowsToRight));
+		//normalCfl.add(new PairProduction(this.flowsToRight, this.flowsToRight, this.flowsToRight));
 		
 		// add production flowsToRight -> store_* alias load_*
 		//normalCfl.add(this.flowsToRight, this.store_star, this.load_star);
 		
 		// add production flowsTo ->  new flowsToRight
-		normalCfl.add(this.flowsTo, this.new_terminal, this.flowsToRight);
+		//normalCfl.add(this.flowsTo, this.new_terminal, this.flowsToRight);
 		
 		// add production flowsTo -> new
 		normalCfl.add(this.flowsTo, this.new_terminal);
@@ -150,7 +152,8 @@ public class FlowsToGraph extends CFLGraph {
 		
 		for(String field : this.fields) {
 			// add production flowsToRight -> store_f alias load_f
-			normalCfl.add(this.flowsToRight, this.store_(field), this.alias, this.load_(field));
+			//normalCfl.add(this.flowsToRight, this.store_(field), this.alias, this.load_(field));
+			normalCfl.add(this.flowsTo, this.flowsTo, this.store_(field), this.alias, this.load_(field));
 			
 			// add production flowsToRight -> store_* alias load_f
 			//normalCfl.add(this.flowsToRight, this.store_star, this.alias, this.store_star);
