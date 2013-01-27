@@ -165,28 +165,6 @@ public class FlowsToGraph extends CFLGraph {
 		normalCfl.add(this.taints, this.taints, this.flowsTo, this.passThrough, this.flowsToBar);
 		// sourceSinkFlow(src,sink) -> taints(src,o), flowsTo(o,p), sink(p,sink)
 		normalCfl.add(this.sourceSinkFlow, this.taints, this.flowsTo, this.sink);
-				
-		/*
-
-		// REMEMBER TO ADD A PRODUCTION FOR load_fBar
-		normalCfl.add(this.flowsTo, this.assign);
-		normalCfl.add(this.flowsTo, this.flowsTo, this.flowsTo);
-		for(String field : this.fields) {
-			normalCfl.add(this.flowsTo, this.store_(field), this.alias, this.load_(field));
-			normalCfl.add(this.alias, new Variable("load_" + field + "Bar"), this.alias, this.load_(field));
-		}
-		
-		normalCfl.add(this.alias, this.flowsTo);
-		normalCfl.add(this.alias, this.flowsToBar);
-		normalCfl.add(this.alias, this.flowsToBar, this.alias, this.flowsTo);
-		
-		normalCfl.add(this.taints, this.source);
-		normalCfl.add(this.taints, this.source, this.flowsTo);
-		normalCfl.add(this.taints, this.taints, this.passThrough);
-		normalCfl.add(this.taints, this.passThrough, this.flowsTo);
-		
-		normalCfl.add(this.sourceSinkFlow, this.taints, this.sink);
-		*/
 		
 		return normalCfl;
 	}

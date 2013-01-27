@@ -225,14 +225,6 @@ public class CFLGraph extends HashSet<Vertex> {
 				curMinGraphElementPaths.put(element, new Path(source, pair));
 				curMinGraphElementQueue.push(element, this.weights.get(new Triple<Vertex,Vertex,Element>(source, pair.getX(), pair.getY())));
 			}
-			// TODO: fix hack
-			/*
-			if(source.getName().startsWith("v")) {
-				GraphElement element = new GraphElement(source, source, new Variable("alias"));
-				curMinGraphElementPaths.put(element, new Path(source, new Pair<Vertex,Terminal>(source, new Terminal("alias"))));
-				curMinGraphElementQueue.push(element, 0);
-			}
-			*/
 		}
 
 		// step 2: for each element in minGraphElementQueue, iterate through productions and check if they are smaller
@@ -256,7 +248,7 @@ public class CFLGraph extends HashSet<Vertex> {
 		    minGraphElementPathsBySink.add(new Pair<Vertex,Element>(minElement.getSink(),minElement.getElement()), new Pair<Vertex,Path>(minElement.getSource(),minPath));
 		    
 		    // TODO: fix temporary hack
-		    if(minElement.getElement().equals(new Variable("flowsTo"))) {// || (minElement.getElement().getName().startsWith("load_") && !minElement.getElement().getName().endsWith("Bar"))) {
+		    if(minElement.getElement().equals(new Variable("flowsTo"))) {
 		    	GraphElement barElement = new GraphElement(minElement.getSink(), minElement.getSource(), new Variable(minElement.getElement().getName() + "Bar"));
 		    	Path barPath = minPath.reverse();
 		    	curMinGraphElementQueue.update(barElement, barPath.getWeight());
