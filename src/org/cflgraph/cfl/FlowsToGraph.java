@@ -159,24 +159,34 @@ public class FlowsToGraph extends CFLGraph {
 			//normalCfl.add(this.flowsToRight, this.store_(field), this.alias, this.load_star);
 		}
 		
-		// annotated flows
-		// label(l,o2) -> label(l,o1), flowsTo(o1,p), passThrough(p,q), flowsToBar(q,o2)
-		//normalCfl.add(this.label, this.label, this.flowsTo, this.passThrough, this.flowsToBar);
+		// taints(src,o) -> source(src,v), flowsToBar(v,o)
+		normalCfl.add(this.taints, this.source, this.flowsToBar);
+		// taints(src,o2) -> taints(src,o1), flowsTo(o1,a), passThrough(a,b), flowsToBar(b,o2)
+		normalCfl.add(this.taints, this.taints, this.flowsTo, this.passThrough, this.flowsToBar);
+		// sourceSinkFlow(src,sink) -> taints(src,o), flowsTo(o,p), sink(p,sink)
+		normalCfl.add(this.sourceSinkFlow, this.taints, this.flowsTo, this.sink);
+				
+		/*
+
+		// REMEMBER TO ADD A PRODUCTION FOR load_fBar
+		normalCfl.add(this.flowsTo, this.assign);
+		normalCfl.add(this.flowsTo, this.flowsTo, this.flowsTo);
+		for(String field : this.fields) {
+			normalCfl.add(this.flowsTo, this.store_(field), this.alias, this.load_(field));
+			normalCfl.add(this.alias, new Variable("load_" + field + "Bar"), this.alias, this.load_(field));
+		}
 		
-		// label(l,o) -> source(l,v), flowsToBar(v,o)
-		//normalCfl.add(this.label, this.source, this.flowsToBar);
+		normalCfl.add(this.alias, this.flowsTo);
+		normalCfl.add(this.alias, this.flowsToBar);
+		normalCfl.add(this.alias, this.flowsToBar, this.alias, this.flowsTo);
 		
-		// sourceSinkFlow(l1,l2) -> label(l1,o), flowsTo(o,v), sink(v,l2)
-		//normalCfl.add(this.sourceSinkFlow, this.label, this.flowsTo, this.sink);
-		
-		// taints(l,p) -> source(l,p)
 		normalCfl.add(this.taints, this.source);
-		// taints(l,q) -> taints(l,p), alias(p,q)
-		normalCfl.add(this.taints, this.taints, this.alias);
-		// taints(l,q) -> taints(l,p), passThrough(p,q)
+		normalCfl.add(this.taints, this.source, this.flowsTo);
 		normalCfl.add(this.taints, this.taints, this.passThrough);
-		// sourceSinkFlow(l1,l2) -> taints(l1,p), sink(p,l2)
+		normalCfl.add(this.taints, this.passThrough, this.flowsTo);
+		
 		normalCfl.add(this.sourceSinkFlow, this.taints, this.sink);
+		*/
 		
 		return normalCfl;
 	}

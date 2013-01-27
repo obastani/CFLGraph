@@ -65,7 +65,7 @@ public class Main {
 			}
 		}
 		for(String methodName : methodArgs.keySet()) {
-			graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
+			//graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
 		}
 		
 		return graph;
@@ -76,6 +76,7 @@ public class Main {
 		try {
 			String input = "supernote_cs";
 			FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
+
 			Map<GraphElement,Path> shortestPaths = cflGraph.getShortestPaths();
 			PrintWriter pw1 = new PrintWriter("output/" + input + ".knuth");
 			for(Map.Entry<GraphElement,Path> entry : shortestPaths.entrySet()) {
@@ -86,6 +87,7 @@ public class Main {
 				}
 			}
 			pw1.close();
+
 			/*
 			Set<GraphElement> elements = cflGraph.getProductions();
 			PrintWriter pw2 = new PrintWriter("output/" + input + ".reps");
@@ -96,7 +98,6 @@ public class Main {
 			}
 			pw2.close();
 			*/
-			
 			
 		} catch(Exception e) {
 			e.printStackTrace();
