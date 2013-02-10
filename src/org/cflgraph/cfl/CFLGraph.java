@@ -13,6 +13,7 @@ import org.cflgraph.cfl.Element.Terminal;
 import org.cflgraph.cfl.Element.Variable;
 import org.cflgraph.cfl.NormalCFL.PairProduction;
 import org.cflgraph.cfl.NormalCFL.SingleProduction;
+import org.cflgraph.utility.Utility.Counter;
 import org.cflgraph.utility.Utility.Heap;
 import org.cflgraph.utility.Utility.MultivalueMap;
 import org.cflgraph.utility.Utility.Pair;
@@ -60,6 +61,17 @@ public class CFLGraph extends HashSet<Vertex> {
 	private MultivalueMap<Vertex,Pair<Vertex,Terminal>> outgoingEdges = new MultivalueMap<Vertex,Pair<Vertex,Terminal>>();
 	
 	private Map<Triple<Vertex,Vertex,Terminal>,Integer> weights = new HashMap<Triple<Vertex,Vertex,Terminal>,Integer>();
+	
+	private Counter<SingleProduction> singleProductionCounts = new Counter<SingleProduction>();
+	private Counter<PairProduction> pairProductionCounts = new Counter<PairProduction>();
+	
+	public Counter<PairProduction> getPairProductionCounts() {
+		return this.pairProductionCounts;
+	}
+	
+	public Counter<SingleProduction> getSingleProductionCounts() {
+		return this.singleProductionCounts;
+	}
 	
 	public void addEdge(Vertex source, Vertex sink, Terminal terminal, int weight) {
 		super.add(source);
@@ -265,6 +277,8 @@ public class CFLGraph extends HashSet<Vertex> {
 		        if(curPath == null || newPath.getWeight() < curPath.getWeight()) {
 		            curMinGraphElementQueue.update(curElement, newPath.getWeight());
 		            curMinGraphElementPaths.put(curElement, newPath);
+		            
+		            this.singleProductionCounts.incrementCount(singleProduction);
 		        }
 		    }
 
@@ -283,6 +297,8 @@ public class CFLGraph extends HashSet<Vertex> {
 		    				curMinGraphElementQueue.update(curElement, newPath.getWeight());
 		    				curMinGraphElementPaths.put(curElement, newPath);
 		    			}
+		    			
+		    			this.pairProductionCounts.incrementCount(pairProduction);
 		    		}
 		    	}
 		    }
@@ -301,6 +317,8 @@ public class CFLGraph extends HashSet<Vertex> {
 		    				curMinGraphElementQueue.update(curElement, newPath.getWeight());
 		    				curMinGraphElementPaths.put(curElement, newPath);
 		    			}
+		    			
+		    			this.pairProductionCounts.incrementCount(pairProduction);
 		    		}
 		    	}
 		    }

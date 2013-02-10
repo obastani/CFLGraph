@@ -148,6 +148,24 @@ public class NormalCFL {
 		this.pairProductionsBySecondInput.add(pairProduction.getSecondInput(), pairProduction);
 	}
 	
+	/*
+	public Set<SingleProduction> getSingleProductions() {
+		Set<SingleProduction> singleProductions = new HashSet<SingleProduction>();
+		for(Set<SingleProduction> singleProductionSet : this.singleProductionsByInput.values()) {
+			singleProductions.addAll(singleProductionSet);
+		}
+		return singleProductions;
+	}
+	
+	public Set<PairProduction> getPairProductions() {
+		Set<PairProduction> pairProductions = new HashSet<PairProduction>();
+		for(Set<PairProduction> pairProductionSet : this.pairProductionsByFirstInput.values()) {
+			pairProductions.addAll(pairProductionSet);
+		}
+		return pairProductions;
+	}
+	*/
+	
 	public Set<PairProduction> getPairProductionsByFirstInput(Element input) {
 		return this.pairProductionsByFirstInput.get(input);
 	}

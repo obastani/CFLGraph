@@ -6,13 +6,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.cflgraph.cfl.CFLGraph.GraphElement;
 import org.cflgraph.cfl.CFLGraph.Path;
 import org.cflgraph.cfl.CFLGraph.Vertex;
 import org.cflgraph.cfl.Element.Terminal;
 import org.cflgraph.cfl.FlowsToGraph;
+import org.cflgraph.cfl.NormalCFL.PairProduction;
+import org.cflgraph.cfl.NormalCFL.SingleProduction;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
 public class Main {
@@ -86,7 +87,17 @@ public class Main {
 					pw1.println();
 				}
 			}
+			pw1.println();
+			
+			for(Map.Entry<SingleProduction,Integer> entry : cflGraph.getSingleProductionCounts().entrySet()) {
+				pw1.println(entry.getKey() + " : " + entry.getValue());
+			}
+			for(Map.Entry<PairProduction,Integer> entry : cflGraph.getPairProductionCounts().entrySet()) {
+				pw1.println(entry.getKey() + " : " + entry.getValue());
+			}
 			pw1.close();
+			
+			
 
 			/*
 			Set<GraphElement> elements = cflGraph.getProductions();

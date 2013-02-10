@@ -316,4 +316,22 @@ public class Utility {
 	        return s.toString();
 	    }
 	}
+	
+	public static class Counter<V> extends HashMap<V,Integer> {
+		private static final long serialVersionUID = -6883888043330022742L;
+
+		public int getCount(V v) {
+			Integer count = super.get(v);
+			return count == null ? 0 : count;
+		}
+		
+		public void incrementCount(V v) {
+			Integer curCount = super.get(v);
+			if(curCount == null) {
+				super.put(v, 1);
+			} else {
+				super.put(v, curCount+1);
+			}
+		}
+	}
 }

@@ -6,8 +6,6 @@ import java.util.Set;
 
 import org.cflgraph.cfl.Element.Terminal;
 import org.cflgraph.cfl.Element.Variable;
-import org.cflgraph.cfl.NormalCFL.PairProduction;
-import org.cflgraph.cfl.NormalCFL.SingleProduction;
 
 public class FlowsToGraph extends CFLGraph {
 	private static final long serialVersionUID = 1L;
@@ -38,7 +36,7 @@ public class FlowsToGraph extends CFLGraph {
 	private Variable flowsTo = new Variable("flowsTo");
 	private Variable flowsToBar = new Variable("flowsToBar");
 
-	private Variable flowsToRight = new Variable("flowsToRight");
+	//private Variable flowsToRight = new Variable("flowsToRight");
 	
 	private Variable alias = new Variable("alias");
 	
