@@ -35,6 +35,8 @@ public class FlowsToGraph extends CFLGraph {
 	
 	private Variable flowsTo = new Variable("flowsTo");
 	private Variable flowsToBar = new Variable("flowsToBar");
+	
+	private Variable flowsToField_(String field) { return new Variable("flowsToField_" + field); }
 
 	//private Variable flowsToRight = new Variable("flowsToRight");
 	
@@ -125,6 +127,36 @@ public class FlowsToGraph extends CFLGraph {
 		}
 	}
 	
+	public NormalCFL getFlowsToCfl2() {
+		NormalCFL normalCfl = new NormalCFL();
+
+		// flowsTo(o,a_c) <- new(o,a_c)
+		normalCfl.add(this.flowsTo, this.new_terminal);
+
+		// flowsTo(o,b_c) <- flowsTo(o,a_c) assign(a_c,b_c)
+		normalCfl.add(this.flowsTo, this.flowsTo, this.assign);
+ 
+		// flowsTo(o,b_c2) <- flowsTo(o,a_c1) assign(a_c1,b_c2)
+		normalCfl.add(this.flowsTo, this.flowsTo, this.assign);
+
+		for(String field : this.fields) {
+			// flowsToField_f(o2,o1) <- flowsTo(o2,a_c) store_f(a_c,p_c) flowsToBar(p_c,o1)
+			normalCfl.add(this.flowsToField_(field), this.flowsTo, this.store_(field), this.flowsToBar);
+
+			// flowsTo(o2,a_c) <- flowsToField_f(o2,o1) flowsTo(o1,p_c) load_f(p_c,a_c)
+			normalCfl.add(this.flowsTo, this.flowsToField_(field), this.flowsTo, this.load_(field));
+		}
+		
+		// taints(src,o) -> source(src,v), flowsToBar(v,o)
+		normalCfl.add(this.taints, this.source, this.flowsToBar);
+		// taints(src,o2) -> taints(src,o1), flowsTo(o1,a), passThrough(a,b), flowsToBar(b,o2)
+		normalCfl.add(this.taints, this.taints, this.flowsTo, this.passThrough, this.flowsToBar);
+		// sourceSinkFlow(src,sink) -> taints(src,o), flowsTo(o,p), sink(p,sink)
+		normalCfl.add(this.sourceSinkFlow, this.taints, this.flowsTo, this.sink);
+
+		return normalCfl;
+	}
+	
 	public NormalCFL getFlowsToCfl() {
 		NormalCFL normalCfl = new NormalCFL();
 
@@ -171,10 +203,10 @@ public class FlowsToGraph extends CFLGraph {
 	}
 
 	public Map<GraphElement,Path> getShortestPaths() {
-		return super.getShortestPaths(this.getFlowsToCfl());
+		return super.getShortestPaths(this.getFlowsToCfl2());
 	}
 	
 	public Set<GraphElement> getProductions() {
-		return super.getProductions(this.getFlowsToCfl());
+		return super.getProductions(this.getFlowsToCfl2());
 	}
 }

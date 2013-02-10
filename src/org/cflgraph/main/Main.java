@@ -80,7 +80,7 @@ public class Main {
 	public static void main(String[] args) {
 		long time = System.currentTimeMillis();
 		try {
-			String input = "supernote_cs";
+			String input = "connectbot_cs";
 			FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
 
 			Map<GraphElement,Path> shortestPaths = cflGraph.getShortestPaths();

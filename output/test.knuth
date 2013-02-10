@@ -1,3 +1,16 @@
 sourceSinkFlow(source,sink), weight: 0
 source source z newBar o2 new z store_f y assignBar x newBar o1 new x assign w load_f v sink sink
 
+
+Rule counts for pair production rules:
+alias -> (flowsToBar,flowsTo) : 13
+flowsTo^store_f^alias -> (flowsTo^store_f,alias) : 3
+flowsTo -> (flowsTo,assign) : 2
+taints^flowsTo -> (taints,flowsTo) : 2
+flowsTo -> (flowsTo^store_f^alias,load_f) : 1
+flowsTo^store_f -> (flowsTo,store_f) : 1
+sourceSinkFlow -> (taints^flowsTo,sink) : 1
+taints -> (source,flowsToBar) : 1
+
+Rule counts for single production rules:
+flowsTo -> (new) : 2
