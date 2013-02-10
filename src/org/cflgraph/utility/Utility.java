@@ -1,12 +1,17 @@
 package org.cflgraph.utility;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
+
+import org.cflgraph.cfl.NormalCFL.PairProduction;
 
 public class Utility {
 	public static class Pair<X,Y> {
@@ -332,6 +337,23 @@ public class Utility {
 			} else {
 				super.put(v, curCount+1);
 			}
+		}
+		
+		public List<Map.Entry<V,Integer>> sortedKeySet() {
+			List<Map.Entry<V,Integer>> entries = new ArrayList(super.entrySet());
+			Collections.sort(entries, new Comparator<Map.Entry<V,Integer>>() {
+				@Override
+				public int compare(Entry<V, Integer> arg0, Entry<V, Integer> arg1) {
+					if(arg0.getValue() > arg1.getValue()) {
+						return -1;
+					} else if(arg0.getValue() == arg1.getValue()) {
+						return 0;
+					} else {
+						return 1;
+					}
+				}
+			});
+			return entries;
 		}
 	}
 }

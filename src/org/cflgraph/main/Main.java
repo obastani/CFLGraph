@@ -4,8 +4,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.cflgraph.cfl.CFLGraph.GraphElement;
 import org.cflgraph.cfl.CFLGraph.Path;
@@ -88,17 +93,19 @@ public class Main {
 				}
 			}
 			pw1.println();
-			
-			for(Map.Entry<SingleProduction,Integer> entry : cflGraph.getSingleProductionCounts().entrySet()) {
+
+			pw1.println("Rule counts for pair production rules:");
+
+			for(Map.Entry<PairProduction,Integer> entry : cflGraph.getPairProductionCounts().sortedKeySet()) {
 				pw1.println(entry.getKey() + " : " + entry.getValue());
 			}
-			for(Map.Entry<PairProduction,Integer> entry : cflGraph.getPairProductionCounts().entrySet()) {
+			pw1.println();
+			pw1.println("Rule counts for single production rules:");
+			for(Map.Entry<SingleProduction,Integer> entry : cflGraph.getSingleProductionCounts().sortedKeySet()) {
 				pw1.println(entry.getKey() + " : " + entry.getValue());
 			}
 			pw1.close();
 			
-			
-
 			/*
 			Set<GraphElement> elements = cflGraph.getProductions();
 			PrintWriter pw2 = new PrintWriter("output/" + input + ".reps");
