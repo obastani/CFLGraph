@@ -6,6 +6,9 @@ import java.util.Set;
 
 import org.cflgraph.cfl.Element.Terminal;
 import org.cflgraph.cfl.Element.Variable;
+import org.cflgraph.utility.Utility.Pair;
+
+import org.cflgraph.utility.Utility.Triple;
 
 public class FlowsToGraph extends CFLGraph {
 	private static final long serialVersionUID = 1L;
@@ -43,8 +46,8 @@ public class FlowsToGraph extends CFLGraph {
 	private Variable alias = new Variable("alias");
 	
 	// variables for annotated flows
-	private Variable sourceSinkFlow = new Variable("sourceSinkFlow");
-	private Variable taints = new Variable("taints");
+	//private Variable sourceSinkFlow = new Variable("sourceSinkFlow");
+	//private Variable taints = new Variable("taints");
 	
 	// various functions
 	
@@ -135,9 +138,6 @@ public class FlowsToGraph extends CFLGraph {
 
 		// flowsTo(o,b_c) <- flowsTo(o,a_c) assign(a_c,b_c)
 		normalCfl.add(this.flowsTo, this.flowsTo, this.assign);
- 
-		// flowsTo(o,b_c2) <- flowsTo(o,a_c1) assign(a_c1,b_c2)
-		normalCfl.add(this.flowsTo, this.flowsTo, this.assign);
 
 		for(String field : this.fields) {
 			// flowsToField_f(o2,o1) <- flowsTo(o2,a_c) store_f(a_c,p_c) flowsToBar(p_c,o1)
@@ -147,12 +147,14 @@ public class FlowsToGraph extends CFLGraph {
 			normalCfl.add(this.flowsTo, this.flowsToField_(field), this.flowsTo, this.load_(field));
 		}
 		
+		/*
 		// taints(src,o) -> source(src,v), flowsToBar(v,o)
 		normalCfl.add(this.taints, this.source, this.flowsToBar);
 		// taints(src,o2) -> taints(src,o1), flowsTo(o1,a), passThrough(a,b), flowsToBar(b,o2)
 		normalCfl.add(this.taints, this.taints, this.flowsTo, this.passThrough, this.flowsToBar);
 		// sourceSinkFlow(src,sink) -> taints(src,o), flowsTo(o,p), sink(p,sink)
 		normalCfl.add(this.sourceSinkFlow, this.taints, this.flowsTo, this.sink);
+		*/
 
 		return normalCfl;
 	}
@@ -192,14 +194,52 @@ public class FlowsToGraph extends CFLGraph {
 			//normalCfl.add(this.flowsToRight, this.store_(field), this.alias, this.load_star);
 		}
 		
+		/*
 		// taints(src,o) -> source(src,v), flowsToBar(v,o)
 		normalCfl.add(this.taints, this.source, this.flowsToBar);
 		// taints(src,o2) -> taints(src,o1), flowsTo(o1,a), passThrough(a,b), flowsToBar(b,o2)
 		normalCfl.add(this.taints, this.taints, this.flowsTo, this.passThrough, this.flowsToBar);
 		// sourceSinkFlow(src,sink) -> taints(src,o), flowsTo(o,p), sink(p,sink)
 		normalCfl.add(this.sourceSinkFlow, this.taints, this.flowsTo, this.sink);
+		*/
 		
 		return normalCfl;
+	}
+	
+	public TaintFlowGraph getTaintFlowGraph() {
+		Set<Terminal> taintFlowTerminals = new HashSet<Terminal>();
+		taintFlowTerminals.add(this.source);
+		taintFlowTerminals.add(this.sink);
+		taintFlowTerminals.add(this.passThrough);
+				
+		TaintFlowGraph taintFlowGraph = new TaintFlowGraph();
+		
+		for(Vertex source : this.outgoingEdges.keySet()) {
+			for(Pair<Vertex,Terminal> pair : this.outgoingEdges.get(source)) {
+				Vertex sink = pair.getX();
+				Terminal terminal = pair.getY();
+				
+				if(taintFlowTerminals.contains(terminal)) {
+					int weight = this.weights.get(new Triple<Vertex,Vertex,Terminal>(source,sink,terminal));
+					taintFlowGraph.addEdge(source, sink, terminal, weight);
+				}
+			}
+		}
+
+		Set<Element> taintFlowElements = new HashSet<Element>();
+		taintFlowElements.add(this.flowsTo);
+		taintFlowElements.add(this.flowsToBar);
+		
+		Map<GraphElement,Path> paths = getShortestPaths();
+		for(Map.Entry<GraphElement,Path> entry : paths.entrySet()) {
+			GraphElement element = entry.getKey();
+			int weight = entry.getValue().getWeight();
+			if(taintFlowElements.contains(element.getElement())) {
+				taintFlowGraph.addEdge(element.getSource(), element.getSink(), new Terminal(element.getElement().getName()), weight);
+			}
+		}
+		
+		return taintFlowGraph;
 	}
 
 	public Map<GraphElement,Path> getShortestPaths() {

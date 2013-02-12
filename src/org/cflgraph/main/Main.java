@@ -4,21 +4,15 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.cflgraph.cfl.CFLGraph.GraphElement;
 import org.cflgraph.cfl.CFLGraph.Path;
 import org.cflgraph.cfl.CFLGraph.Vertex;
 import org.cflgraph.cfl.Element.Terminal;
 import org.cflgraph.cfl.FlowsToGraph;
-import org.cflgraph.cfl.NormalCFL.PairProduction;
-import org.cflgraph.cfl.NormalCFL.SingleProduction;
+import org.cflgraph.cfl.TaintFlowGraph;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
 public class Main {
@@ -71,7 +65,7 @@ public class Main {
 			}
 		}
 		for(String methodName : methodArgs.keySet()) {
-			//graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
+			graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
 		}
 		
 		return graph;
@@ -81,9 +75,10 @@ public class Main {
 		long time = System.currentTimeMillis();
 		try {
 			String input = "connectbot_cs";
-			FlowsToGraph cflGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
-
-			Map<GraphElement,Path> shortestPaths = cflGraph.getShortestPaths();
+			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
+			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
+			
+			Map<GraphElement,Path> shortestPaths = taintFlowGraph.getShortestPaths();
 			PrintWriter pw1 = new PrintWriter("output/" + input + ".knuth");
 			for(Map.Entry<GraphElement,Path> entry : shortestPaths.entrySet()) {
 				if(entry.getKey().getElement().getName().equals("sourceSinkFlow")) {
@@ -94,6 +89,7 @@ public class Main {
 			}
 			pw1.println();
 
+			/*
 			pw1.println("Rule counts for pair production rules:");
 
 			for(Map.Entry<PairProduction,Integer> entry : cflGraph.getPairProductionCounts().sortedKeySet()) {
@@ -104,6 +100,8 @@ public class Main {
 			for(Map.Entry<SingleProduction,Integer> entry : cflGraph.getSingleProductionCounts().sortedKeySet()) {
 				pw1.println(entry.getKey() + " : " + entry.getValue());
 			}
+			*/
+			
 			pw1.close();
 			
 			/*

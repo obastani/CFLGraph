@@ -56,11 +56,11 @@ public class CFLGraph extends HashSet<Vertex> {
 		}
 	}
 
-	private MultivalueMap<Pair<Vertex,Vertex>,Terminal> edges = new MultivalueMap<Pair<Vertex,Vertex>,Terminal>();
-	private MultivalueMap<Vertex,Pair<Vertex,Terminal>> incomingEdges = new MultivalueMap<Vertex,Pair<Vertex,Terminal>>();
-	private MultivalueMap<Vertex,Pair<Vertex,Terminal>> outgoingEdges = new MultivalueMap<Vertex,Pair<Vertex,Terminal>>();
+	protected MultivalueMap<Pair<Vertex,Vertex>,Terminal> edges = new MultivalueMap<Pair<Vertex,Vertex>,Terminal>();
+	protected MultivalueMap<Vertex,Pair<Vertex,Terminal>> incomingEdges = new MultivalueMap<Vertex,Pair<Vertex,Terminal>>();
+	protected MultivalueMap<Vertex,Pair<Vertex,Terminal>> outgoingEdges = new MultivalueMap<Vertex,Pair<Vertex,Terminal>>();
 	
-	private Map<Triple<Vertex,Vertex,Terminal>,Integer> weights = new HashMap<Triple<Vertex,Vertex,Terminal>,Integer>();
+	protected Map<Triple<Vertex,Vertex,Terminal>,Integer> weights = new HashMap<Triple<Vertex,Vertex,Terminal>,Integer>();
 	
 	private Counter<SingleProduction> singleProductionCounts = new Counter<SingleProduction>();
 	private Counter<PairProduction> pairProductionCounts = new Counter<PairProduction>();
@@ -73,6 +73,8 @@ public class CFLGraph extends HashSet<Vertex> {
 		return this.singleProductionCounts;
 	}
 	
+	private Map<Pair<Vertex,Terminal>,Vertex> outgoingEdgesByTerminal = new HashMap<Pair<Vertex,Terminal>,Vertex>();
+	
 	public void addEdge(Vertex source, Vertex sink, Terminal terminal, int weight) {
 		super.add(source);
 		super.add(sink);
@@ -81,7 +83,9 @@ public class CFLGraph extends HashSet<Vertex> {
 
 		this.edges.add(new Pair<Vertex,Vertex>(source,sink), terminal);
 		this.incomingEdges.add(sink, new Pair<Vertex,Terminal>(source,terminal));
-		this.outgoingEdges.add(source, new Pair<Vertex,Terminal>(sink,terminal));		
+		this.outgoingEdges.add(source, new Pair<Vertex,Terminal>(sink,terminal));
+		
+		this.outgoingEdgesByTerminal.put(new Pair<Vertex,Terminal>(source,terminal), sink);
 	}
 
 	public void addEdge(Vertex source, Vertex sink, Terminal terminal) {
@@ -273,12 +277,14 @@ public class CFLGraph extends HashSet<Vertex> {
 		    	
 		        Path curPath = curMinGraphElementPaths.get(curElement);
 		        Path newPath = minGraphElementPaths.get(minElement);
+	            
+	            if(curPath == null) {
+	            	this.singleProductionCounts.incrementCount(singleProduction);
+	            }
 
 		        if(curPath == null || newPath.getWeight() < curPath.getWeight()) {
-		            curMinGraphElementQueue.update(curElement, newPath.getWeight());
-		            curMinGraphElementPaths.put(curElement, newPath);
-		            
-		            this.singleProductionCounts.incrementCount(singleProduction);
+					curMinGraphElementQueue.update(curElement, newPath.getWeight());
+					curMinGraphElementPaths.put(curElement, newPath);
 		        }
 		    }
 
@@ -292,13 +298,21 @@ public class CFLGraph extends HashSet<Vertex> {
 			    		
 		    			Path curPath = curMinGraphElementPaths.get(curElement);
 		    			Path newPath = new Path(minGraphElementPaths.get(minElement), secondPath);
-		    			
-		    			if(curPath == null || newPath.getWeight() < curPath.getWeight()) {					    	
-		    				curMinGraphElementQueue.update(curElement, newPath.getWeight());
-		    				curMinGraphElementPaths.put(curElement, newPath);
+
+			            if(curPath == null) {
+			            	if(pairProduction.getFirstInput().getName().startsWith("flowsToField_") && !pairProduction.getFirstInput().getName().contains("^")) {
+			            		String field = pairProduction.getFirstInput().getName().substring(13);
+			            		if(this.outgoingEdgesByTerminal.get(new Pair<Vertex,Terminal>(curElement.getSink(), new Terminal("load_" + field))) == null) {
+			            			continue;
+			            		}
+			            	}
+			            	this.pairProductionCounts.incrementCount(pairProduction);
+			            }
+			            
+		    			if(curPath == null || newPath.getWeight() < curPath.getWeight()) {
+	    					curMinGraphElementQueue.update(curElement, newPath.getWeight());
+	    					curMinGraphElementPaths.put(curElement, newPath);
 		    			}
-		    			
-		    			this.pairProductionCounts.incrementCount(pairProduction);
 		    		}
 		    	}
 		    }
@@ -313,12 +327,20 @@ public class CFLGraph extends HashSet<Vertex> {
 		    			Path curPath = curMinGraphElementPaths.get(curElement);
 		    			Path newPath = new Path(firstPath, minGraphElementPaths.get(minElement));
 		    			
-		    			if(curPath == null || newPath.getWeight() < curPath.getWeight()) {
-		    				curMinGraphElementQueue.update(curElement, newPath.getWeight());
-		    				curMinGraphElementPaths.put(curElement, newPath);
-		    			}
+			            if(curPath == null) {
+			            	if(pairProduction.getFirstInput().getName().startsWith("flowsToField_") && !pairProduction.getFirstInput().getName().contains("^")) {
+			            		String field = pairProduction.getFirstInput().getName().substring(13);
+			            		if(this.outgoingEdgesByTerminal.get(new Pair<Vertex,Terminal>(curElement.getSink(), new Terminal("load_" + field))) == null) {
+			            			continue;
+			            		}
+			            	}
+			            	this.pairProductionCounts.incrementCount(pairProduction);
+			            }
 		    			
-		    			this.pairProductionCounts.incrementCount(pairProduction);
+		    			if(curPath == null || newPath.getWeight() < curPath.getWeight()) {
+	    					curMinGraphElementQueue.update(curElement, newPath.getWeight());
+	    					curMinGraphElementPaths.put(curElement, newPath);
+		    			}
 		    		}
 		    	}
 		    }
