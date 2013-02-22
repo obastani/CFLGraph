@@ -1,14 +1,16 @@
 package org.cflgraph.cfl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Set;
 
 import org.cflgraph.cfl.Element.Variable;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
 public class NormalCFL {
-    public NormalCFL(BufferedReader input) {
+    public NormalCFL(BufferedReader input) throws IOException {
 	String line;
-	while((line = input) != null) {
+	while((line = input.readLine()) != null) {
 	    String[] params = line.split(" ");
 	    if(params.length >= 2) {
 		//this.add(new Element(params[0]), Variable target, Element ... inputs) {
