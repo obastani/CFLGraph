@@ -6,6 +6,16 @@ import org.cflgraph.cfl.Element.Variable;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
 public class NormalCFL {
+    public NormalCFL(BufferedReader input) {
+	String line;
+	while((line = input) != null) {
+	    String[] params = line.split(" ");
+	    if(params.length >= 2) {
+		//this.add(new Element(params[0]), Variable target, Element ... inputs) {
+	    }
+	}
+    }
+
 	public static class SingleProduction {
 		private Variable target;
 		private Element input;

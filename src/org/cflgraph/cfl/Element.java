@@ -1,6 +1,6 @@
 package org.cflgraph.cfl;
 
-public abstract class Element {
+public class Element {
 	public static class Variable extends Element {
 		public Variable(String name) {
 			super(name);
