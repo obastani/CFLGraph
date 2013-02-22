@@ -1,5 +1,7 @@
 package org.cflgraph.cfl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,6 +23,21 @@ import org.cflgraph.utility.Utility.Triple;
 
 public class CFLGraph extends HashSet<Vertex> {
 	private static final long serialVersionUID = 1L;
+
+	public CFLGraph() {};
+
+	public CFLGraph(BufferedReader input) throws IOException {
+	    String line;
+	    while((line = input.readLine()) != null) {
+		String[] params = line.split(" ");
+		if(params.length == 3) {
+		    this.addEdge(new Vertex(params[0]), new Vertex(params[1]), new Terminal(params[2]));
+		} else if(params.length == 4) {
+		    int weight = Integer.parseInt(params[3]);
+		    this.addEdge(new Vertex(params[0]), new Vertex(params[1]), new Terminal(params[2]), weight);
+		}		    
+	    }
+	}
 	
 	public static class Vertex {		
 		private String name;
