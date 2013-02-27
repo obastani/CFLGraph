@@ -1,37 +1,35 @@
 package org.cflgraph.cfl;
 
 import java.util.Map;
-import java.util.Set;
 
-import org.cflgraph.cfl.Element.Terminal;
-import org.cflgraph.cfl.Element.Variable;
+import org.cflgraph.cfl.NormalCFL.Element;
 
 public class TaintFlowGraph extends CFLGraph {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 521959041324489575L;
+	
+	// Elements for annotated flows
+	private Element passThrough = new Element("passThrough");
+	private Element source = new Element("source");
+	private Element sink = new Element("sink");
 
-	// terminals for annotated flows
-	private Terminal passThrough = new Terminal("passThrough");
-	private Terminal source = new Terminal("source");
-	private Terminal sink = new Terminal("sink");
+	private Element flowsTo = new Element("flowsTo");
+	private Element flowsToBar = new Element("flowsToBar");
 
-	private Terminal flowsTo = new Terminal("flowsTo");
-	private Terminal flowsToBar = new Terminal("flowsToBar");
-
-	// variables for annotated flows
-	private Variable sourceSinkFlow = new Variable("sourceSinkFlow");
-	private Variable taints = new Variable("taints");
+	// Elements for annotated flows
+	private Element sourceSinkFlow = new Element("sourceSinkFlow");
+	private Element taints = new Element("taints");
 
 	// various functions
 
-	public Terminal getSource() {
+	public Element getSource() {
 		return this.source;
 	}
 
-	public Terminal getSink() {
+	public Element getSink() {
 		return this.sink;
 	}
 
-	public Terminal getPassThrough() {
+	public Element getPassThrough() {
 		return this.passThrough;
 	}
 
@@ -48,11 +46,7 @@ public class TaintFlowGraph extends CFLGraph {
 		return normalCfl;
 	}
 
-	public Map<GraphElement,Path> getShortestPaths() {
-		return super.getShortestPaths(this.getTaintFlowCfl());
-	}
-
-	public Set<GraphElement> getProductions() {
-		return super.getProductions(this.getTaintFlowCfl());
+	public Map<Edge,EdgeData> getClosure() {
+		return super.getClosure(this.getTaintFlowCfl());
 	}
 }

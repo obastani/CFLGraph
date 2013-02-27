@@ -7,11 +7,11 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.cflgraph.cfl.CFLGraph.GraphElement;
-import org.cflgraph.cfl.CFLGraph.Path;
+import org.cflgraph.cfl.CFLGraph.Edge;
+import org.cflgraph.cfl.CFLGraph.EdgeData;
 import org.cflgraph.cfl.CFLGraph.Vertex;
-import org.cflgraph.cfl.Element.Terminal;
 import org.cflgraph.cfl.FlowsToGraph;
+import org.cflgraph.cfl.NormalCFL.Element;
 import org.cflgraph.cfl.TaintFlowGraph;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
@@ -32,7 +32,7 @@ public class Main {
 				Vertex source = new Vertex(tokens[0]);
 				Vertex sink = new Vertex(tokens[1]);
 
-				Terminal label = null;
+				Element label = null;
 				if(tokens[2].startsWith("new")) {
 					label = graph.getNew();
 				} else if(tokens[2].startsWith("load_")) {
@@ -78,42 +78,30 @@ public class Main {
 			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
 			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
 			
-			Map<GraphElement,Path> shortestPaths = taintFlowGraph.getShortestPaths();
-			PrintWriter pw1 = new PrintWriter("output/" + input + ".knuth");
-			for(Map.Entry<GraphElement,Path> entry : shortestPaths.entrySet()) {
+			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
+			for(Map.Entry<Edge,EdgeData> entry : taintFlowGraph.getClosure().entrySet()) {
 				if(entry.getKey().getElement().getName().equals("sourceSinkFlow")) {
-					pw1.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
-					pw1.println(entry.getValue());
-					pw1.println();
+					pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
+					//System.out.println(edge.getPath(true));
+					//System.out.println();
 				}
 			}
-			pw1.println();
+			pw.println();
 
 			/*
-			pw1.println("Rule counts for pair production rules:");
+			pw.println("Rule counts for pair production rules:");
 
 			for(Map.Entry<PairProduction,Integer> entry : cflGraph.getPairProductionCounts().sortedKeySet()) {
-				pw1.println(entry.getKey() + " : " + entry.getValue());
+				pw.println(entry.getKey() + " : " + entry.getValue());
 			}
-			pw1.println();
-			pw1.println("Rule counts for single production rules:");
+			pw.println();
+			pw.println("Rule counts for single production rules:");
 			for(Map.Entry<SingleProduction,Integer> entry : cflGraph.getSingleProductionCounts().sortedKeySet()) {
-				pw1.println(entry.getKey() + " : " + entry.getValue());
+				pw.println(entry.getKey() + " : " + entry.getValue());
 			}
 			*/
 			
-			pw1.close();
-			
-			/*
-			Set<GraphElement> elements = cflGraph.getProductions();
-			PrintWriter pw2 = new PrintWriter("output/" + input + ".reps");
-			for(GraphElement element : elements) {
-				if(element.getElement().getName().equals("sourceSinkFlow")) {
-					pw2.println(element);
-				}
-			}
-			pw2.close();
-			*/
+			pw.close();
 			
 		} catch(Exception e) {
 			e.printStackTrace();
