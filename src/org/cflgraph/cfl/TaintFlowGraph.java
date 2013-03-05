@@ -1,13 +1,32 @@
 package org.cflgraph.cfl;
 
-import java.util.Map;
-
-import org.cflgraph.cfl.NormalCFL.Element;
 
 public class TaintFlowGraph extends CFLGraph {
 	private static final long serialVersionUID = 521959041324489575L;
 	
+	private NormalCfl normalCfl = new NormalCfl();
+	
+	public TaintFlowGraph() {
+		int taints = this.normalCfl.elements.getIdByElement("taints");
+		int source = this.normalCfl.elements.getIdByElement("source");
+		int sink = this.normalCfl.elements.getIdByElement("sink");
+		
+		int passThrough = this.normalCfl.elements.getIdByElement("passThrough");
+		
+		int flowsTo = this.normalCfl.elements.getIdByElement("flowsTo");
+		int flowsToBar = this.normalCfl.elements.getIdByElement("flowsToBar");
+		int sourceSinkFlow = this.normalCfl.elements.getIdByElement("sourceSinkFlow");
+		
+		// taints(src,o) -> source(src,v), flowsToBar(v,o)
+		this.normalCfl.add(taints, source, flowsToBar);
+		// taints(src,o2) -> taints(src,o1), flowsTo(o1,a), passThrough(a,b), flowsToBar(b,o2)
+		this.normalCfl.add(taints, taints, flowsTo, passThrough, flowsToBar);
+		// sourceSinkFlow(src,sink) -> taints(src,o), flowsTo(o,p), sink(p,sink)
+		this.normalCfl.add(sourceSinkFlow, taints, flowsTo, sink);
+	}
+	
 	// Elements for annotated flows
+	/*
 	private Element passThrough = new Element("passThrough");
 	private Element source = new Element("source");
 	private Element sink = new Element("sink");
@@ -32,21 +51,10 @@ public class TaintFlowGraph extends CFLGraph {
 	public Element getPassThrough() {
 		return this.passThrough;
 	}
+	*/
 
-	public NormalCFL getTaintFlowCfl() {
-		NormalCFL normalCfl = new NormalCFL();
-		
-		// taints(src,o) -> source(src,v), flowsToBar(v,o)
-		normalCfl.add(this.taints, this.source, this.flowsToBar);
-		// taints(src,o2) -> taints(src,o1), flowsTo(o1,a), passThrough(a,b), flowsToBar(b,o2)
-		normalCfl.add(this.taints, this.taints, this.flowsTo, this.passThrough, this.flowsToBar);
-		// sourceSinkFlow(src,sink) -> taints(src,o), flowsTo(o,p), sink(p,sink)
-		normalCfl.add(this.sourceSinkFlow, this.taints, this.flowsTo, this.sink);
-
-		return normalCfl;
-	}
-
-	public Map<Edge,EdgeData> getClosure() {
-		return super.getClosure(this.getTaintFlowCfl());
+	@Override
+	public NormalCfl getNormalCfl() {
+		return this.normalCfl;
 	}
 }

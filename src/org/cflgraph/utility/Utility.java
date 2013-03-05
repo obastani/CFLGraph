@@ -11,6 +11,26 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 public class Utility {
+	public static class Factory<V> {
+		private Map<V,Integer> idByElement = new HashMap<V,Integer>();
+		private Map<Integer,V> elementById = new HashMap<Integer,V>();
+		
+		int curId = 0;
+		
+		public V getElementById(int id) {
+			return this.elementById.get(id);
+		}
+		
+		public int getIdByElement(V v) {
+			if(this.idByElement.get(v) == null) {
+				this.idByElement.put(v, curId);
+				this.elementById.put(curId, v);
+				curId++;
+			}
+			return this.idByElement.get(v);
+		}
+	}
+	
 	public static class Pair<X,Y> {
 		private X x;
 		private Y y;

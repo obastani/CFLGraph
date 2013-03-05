@@ -8,10 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.cflgraph.cfl.CFLGraph.Edge;
-import org.cflgraph.cfl.CFLGraph.EdgeData;
-import org.cflgraph.cfl.CFLGraph.Vertex;
 import org.cflgraph.cfl.FlowsToGraph;
-import org.cflgraph.cfl.NormalCFL.Element;
+import org.cflgraph.cfl.NormalCfl;
 import org.cflgraph.cfl.TaintFlowGraph;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
@@ -20,43 +18,43 @@ public class Main {
 	public static FlowsToGraph getInput(BufferedReader input) throws IOException {
 		// graph
 		FlowsToGraph graph = new FlowsToGraph();
+		NormalCfl normalCfl = graph.getNormalCfl();
 		
 		// stub method arguments
-		MultivalueMap<String,Vertex> methodArgs = new MultivalueMap<String,Vertex>();
-		Map<String,Vertex> methodRet = new HashMap<String,Vertex>();
+		MultivalueMap<String,Integer> methodArgs = new MultivalueMap<String,Integer>();
+		Map<String,Integer> methodRet = new HashMap<String,Integer>();
 		
 		String line;
 		while((line = input.readLine()) != null) {
 			String[] tokens = line.split(" ");
 			if(tokens.length == 3) {
-				Vertex source = new Vertex(tokens[0]);
-				Vertex sink = new Vertex(tokens[1]);
+				int source = graph.vertices.getIdByElement(tokens[0]);
+				int sink = graph.vertices.getIdByElement(tokens[1]);
 
-				Element label = null;
+				Integer label = null;
 				if(tokens[2].startsWith("new")) {
-					label = graph.getNew();
+					label = normalCfl.elements.getIdByElement("new");
 				} else if(tokens[2].startsWith("load_")) {
 					String field = tokens[2].substring(5);
 					graph.addField(field);
-					label = graph.getLoad(field);
+					label = normalCfl.elements.getIdByElement("load_" + field);
 				} else if(tokens[2].startsWith("store_")) {
 					String field = tokens[2].substring(6);
 					graph.addField(field);
-					label = graph.getStore(field);
+					label = normalCfl.elements.getIdByElement("store_" + field);
 				} else if(tokens[2].startsWith("assign")) {
-					label = graph.getAssign();
+					label = normalCfl.elements.getIdByElement("assign");
 				} else if(tokens[2].startsWith("srcFlow")) {
-					label = graph.getSource();
+					label = normalCfl.elements.getIdByElement("source");
 				} else if(tokens[2].startsWith("sinkFlow")) {
-					label = graph.getSink();
+					label = normalCfl.elements.getIdByElement("sink");
 				} else if(tokens[2].startsWith("passThrough")) {
-					label = graph.getPassThrough();
+					label = normalCfl.elements.getIdByElement("passThrough");
 				} else if(tokens[2].startsWith("stubArg")) {
-					//graph.addMethod(tokens[1]);
-					methodArgs.add(tokens[1], new Vertex(tokens[0]));
+					methodArgs.add(tokens[1], graph.vertices.getIdByElement(tokens[0]));
 					label = null;
 				} else if(tokens[2].startsWith("stubRet")) {
-					methodRet.put(tokens[0], new Vertex(tokens[1]));
+					methodRet.put(tokens[0], graph.vertices.getIdByElement(tokens[1]));
 					label = null;
 				}
 				if(label != null) {
@@ -68,20 +66,23 @@ public class Main {
 			graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
 		}
 		
+		//System.out.println(graph);
+		//System.out.println(graph.getNormalCfl());
+		
 		return graph;
 	}
 	
 	public static void main(String[] args) {
 		long time = System.currentTimeMillis();
 		try {
-			String input = "connectbot_cs";
+			String input = "butane_cs";
 			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
 			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
-			
+
 			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
-			for(Map.Entry<Edge,EdgeData> entry : taintFlowGraph.getClosure().entrySet()) {
-				if(entry.getKey().getElement().getName().equals("sourceSinkFlow")) {
-					pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
+			for(Map.Entry<Edge,Integer> entry : taintFlowGraph.getClosure().entrySet()) {
+				if(taintFlowGraph.getNormalCfl().elements.getElementById(entry.getKey().getElement()).equals("sourceSinkFlow")) {
+					pw.println(entry.getKey() + ", weight: " + entry.getValue());
 					//System.out.println(edge.getPath(true));
 					//System.out.println();
 				}
