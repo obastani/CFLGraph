@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.cflgraph.utility.Utility.MultivalueMap;
 
-public class NormalCFL {
+public class NormalCfl {
 	/*
 	public NormalCFL(BufferedReader input) throws IOException {
 		String line;

@@ -2,7 +2,7 @@ package org.cflgraph.cfl;
 
 import java.util.Map;
 
-import org.cflgraph.cfl.NormalCFL.Element;
+import org.cflgraph.cfl.NormalCfl.Element;
 
 public class TaintFlowGraph extends CFLGraph {
 	private static final long serialVersionUID = 521959041324489575L;
@@ -33,8 +33,8 @@ public class TaintFlowGraph extends CFLGraph {
 		return this.passThrough;
 	}
 
-	public NormalCFL getTaintFlowCfl() {
-		NormalCFL normalCfl = new NormalCFL();
+	public NormalCfl getTaintFlowCfl() {
+		NormalCfl normalCfl = new NormalCfl();
 		
 		// taints(src,o) -> source(src,v), flowsToBar(v,o)
 		normalCfl.add(this.taints, this.source, this.flowsToBar);

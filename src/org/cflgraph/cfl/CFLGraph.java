@@ -1,38 +1,19 @@
 package org.cflgraph.cfl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.cflgraph.cfl.CFLGraph.Vertex;
-import org.cflgraph.cfl.NormalCFL.BinaryProduction;
-import org.cflgraph.cfl.NormalCFL.Element;
-import org.cflgraph.cfl.NormalCFL.UnaryProduction;
-import org.cflgraph.utility.Utility.Counter;
+import org.cflgraph.cfl.NormalCfl.BinaryProduction;
+import org.cflgraph.cfl.NormalCfl.Element;
+import org.cflgraph.cfl.NormalCfl.UnaryProduction;
 import org.cflgraph.utility.Utility.Heap;
 import org.cflgraph.utility.Utility.MultivalueMap;
 import org.cflgraph.utility.Utility.Pair;
 
 public class CFLGraph extends HashSet<Vertex> {
 	private static final long serialVersionUID = -8194089350311320116L;
-
-	/*
-	public CFLGraph(BufferedReader input) throws IOException {
-		String line;
-		while((line = input.readLine()) != null) {
-			String[] params = line.split(" ");
-			if(params.length == 3) {
-				this.addEdge(new Vertex(params[0]), new Vertex(params[1]), new Element(params[2]));
-			} else if(params.length == 4) {
-				int weight = Integer.parseInt(params[3]);
-				this.addEdge(new Vertex(params[0]), new Vertex(params[1]), new Element(params[2]), weight);
-			}		    
-		}
-	}
-	*/
 
 	public static class Vertex {		
 		private String name;
@@ -69,10 +50,10 @@ public class CFLGraph extends HashSet<Vertex> {
 	}
 
 	protected Map<Edge,EdgeData> edges = new HashMap<Edge,EdgeData>();
-	protected MultivalueMap<Pair<Vertex,Vertex>,Edge> edgesByVertices = new MultivalueMap<Pair<Vertex,Vertex>,Edge>();
 	protected MultivalueMap<Vertex,Edge> edgesBySource = new MultivalueMap<Vertex,Edge>();
 	protected MultivalueMap<Vertex,Edge> edgesBySink = new MultivalueMap<Vertex,Edge>();
 
+	/*
 	private Counter<UnaryProduction> unaryProductionCounts = new Counter<UnaryProduction>();
 	private Counter<BinaryProduction> binaryProductionCounts = new Counter<BinaryProduction>();
 
@@ -83,6 +64,7 @@ public class CFLGraph extends HashSet<Vertex> {
 	public Counter<UnaryProduction> getUnaryProductionCounts() {
 		return this.unaryProductionCounts;
 	}
+	*/
 
 	private Map<Pair<Vertex,Element>,Edge> edgesBySourceElement = new HashMap<Pair<Vertex,Element>,Edge>();
 
@@ -93,7 +75,6 @@ public class CFLGraph extends HashSet<Vertex> {
 		Edge edge = new Edge(source, sink, element);
 		
 		this.edges.put(edge, new EdgeData(edge, weight));
-		this.edgesByVertices.add(new Pair<Vertex,Vertex>(source,sink), edge);
 		this.edgesBySink.add(sink, edge);
 		this.edgesBySource.add(source, edge);
 
@@ -258,7 +239,7 @@ public class CFLGraph extends HashSet<Vertex> {
 	}
 
 	// run Knuth's algorithms
-	public Map<Edge,EdgeData> getClosure(NormalCFL cfl) {
+	public Map<Edge,EdgeData> getClosure(NormalCfl cfl) {
 
 		// maps from the minimum graph elements to their paths
 		MultivalueMap<Pair<Vertex,Element>,Edge> minEdgesBySourceElement = new MultivalueMap<Pair<Vertex,Element>,Edge>();
@@ -305,9 +286,11 @@ public class CFLGraph extends HashSet<Vertex> {
 				Edge newEdge = new Edge(minEdge.getSource(), minEdge.getSink(), unaryProduction.getOutput());
 				EdgeData curData = curMinEdgeData.get(newEdge);
 				EdgeData newData = curMinEdgeData.get(minEdge);
+				/*
 				if(curData == null) {
 					this.unaryProductionCounts.incrementCount(unaryProduction);
 				}
+				*/
 				if(curData == null || newData.weight < curData.weight) {
 					curMinEdgeQueue.update(newEdge, newData.weight);
 					curMinEdgeData.put(newEdge, new EdgeData(newEdge, newData));
@@ -320,17 +303,17 @@ public class CFLGraph extends HashSet<Vertex> {
 					Edge newEdge = new Edge(minEdge.getSource(), secondEdge.getSink(), binaryProduction.getOutput());
 					EdgeData curData = curMinEdgeData.get(newEdge);
 					EdgeData newData = new EdgeData(newEdge, curMinEdgeData.get(minEdge), curMinEdgeData.get(secondEdge));
-					/*
-					if(curWeight == null) {
+
+					if(curData == null) {
 						if(binaryProduction.getFirstInput().getName().startsWith("flowsToField_") && !binaryProduction.getFirstInput().getName().contains("^")) {
 							String field = binaryProduction.getFirstInput().getName().substring(13);
 							if(this.edgesBySourceElement.get(new Pair<Vertex,Element>(newEdge.getSink(), new Element("load_" + field))) == null) {
 								continue;
 							}
-							this.binaryProductionCounts.incrementCount(binaryProduction);
+							//this.binaryProductionCounts.incrementCount(binaryProduction);
 						}
 					}
-					*/			
+
 					if(curData == null || newData.weight < curData.weight) {
 						curMinEdgeQueue.update(newEdge, newData.weight);
 						curMinEdgeData.put(newEdge, newData);
@@ -344,17 +327,17 @@ public class CFLGraph extends HashSet<Vertex> {
 					Edge newEdge = new Edge(firstEdge.getSource(), minEdge.getSink(), binaryProduction.getOutput());
 					EdgeData curData = curMinEdgeData.get(newEdge);
 					EdgeData newData = new EdgeData(newEdge, curMinEdgeData.get(firstEdge), curMinEdgeData.get(minEdge));
-					/*
-					if(curWeight == null) {
+
+					if(curData == null) {
 						if(binaryProduction.getFirstInput().getName().startsWith("flowsToField_") && !binaryProduction.getFirstInput().getName().contains("^")) {
 							String field = binaryProduction.getFirstInput().getName().substring(13);
 							if(this.edgesBySourceElement.get(new Pair<Vertex,Element>(newEdge.getSink(), new Element("load_" + field))) == null) {
 								continue;
 							}
 						}
-						this.binaryProductionCounts.incrementCount(binaryProduction);
+						//this.binaryProductionCounts.incrementCount(binaryProduction);
 					}
-					*/
+
 					if(curData == null || newData.weight < curData.weight) {
 						curMinEdgeQueue.update(newEdge, newData.weight);
 						curMinEdgeData.put(newEdge, newData);

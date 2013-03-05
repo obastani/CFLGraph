@@ -11,7 +11,7 @@ import org.cflgraph.cfl.CFLGraph.Edge;
 import org.cflgraph.cfl.CFLGraph.EdgeData;
 import org.cflgraph.cfl.CFLGraph.Vertex;
 import org.cflgraph.cfl.FlowsToGraph;
-import org.cflgraph.cfl.NormalCFL.Element;
+import org.cflgraph.cfl.NormalCfl.Element;
 import org.cflgraph.cfl.TaintFlowGraph;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
@@ -72,14 +72,17 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		long time = System.currentTimeMillis();
 		try {
-			String input = "connectbot_cs";
+			String input = "butane_cs";
 			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
+
+			long time = System.currentTimeMillis();
 			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
+			Map<Edge,EdgeData> taintFlow = taintFlowGraph.getClosure();
+			System.out.println("time: " + (System.currentTimeMillis() - time));
 			
 			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
-			for(Map.Entry<Edge,EdgeData> entry : taintFlowGraph.getClosure().entrySet()) {
+			for(Map.Entry<Edge,EdgeData> entry : taintFlow.entrySet()) {
 				if(entry.getKey().getElement().getName().equals("sourceSinkFlow")) {
 					pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
 					//System.out.println(edge.getPath(true));
@@ -106,6 +109,5 @@ public class Main {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("time: " + (System.currentTimeMillis() - time));
 	}
 }

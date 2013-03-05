@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.cflgraph.cfl.NormalCFL.Element;
+import org.cflgraph.cfl.NormalCfl.Element;
 
 public class FlowsToGraph extends CFLGraph {
 	private static final long serialVersionUID = 3857460445048824005L;
@@ -51,8 +51,8 @@ public class FlowsToGraph extends CFLGraph {
 		}
 	}
 	
-	public NormalCFL getFlowsToCfl() {
-		NormalCFL normalCfl = new NormalCFL();
+	public NormalCfl getFlowsToCfl() {
+		NormalCfl normalCfl = new NormalCfl();
 
 		// flowsTo(o,a_c) <- new(o,a_c)
 		normalCfl.add(this.flowsTo, this.new_element);
