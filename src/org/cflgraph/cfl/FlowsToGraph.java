@@ -1,7 +1,6 @@
 package org.cflgraph.cfl;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class FlowsToGraph extends CFLGraph {
@@ -10,33 +9,6 @@ public class FlowsToGraph extends CFLGraph {
 	private Set<String> fields = new HashSet<String>();
 	public void addField(String field) { this.fields.add(field); }
 	
-	// elements
-	/*
-	private Element new_element = new Element("new");
-	private Element assign = new Element("assign");
-	private Element store_(String field) { return new Element("store_" + field); }
-	private Element load_(String field) { return new Element("load_" + field); }
-	
-	private Element flowsTo = new Element("flowsTo");
-	private Element flowsToBar = new Element("flowsToBar");
-	private Element flowsToField_(String field) { return new Element("flowsToField_" + field); }
-	
-	// elements for annotated flows
-	private Element passThrough = new Element("passThrough");
-	private Element source = new Element("source");
-	private Element sink = new Element("sink");	
-	
-	// various functions
-	public Element getAssign() { return this.assign; }
-	public Element getNew() { return this.new_element; }	
-	public void addField(String field) { this.fields.add(field); }	
-	public Element getLoad(String field) { return this.load_(field); }	
-	public Element getStore(String field) { return this.store_(field); }
-	public Element getSource() { return this.source; }
-	public Element getSink() { return this.sink; }
-	public Element getPassThrough() { return this.passThrough; }
-	*/
-	
 	private NormalCfl normalCfl = new NormalCfl();
 	
 	public void addStubMethod(Set<Integer> args, Integer ret, String methodSignature) {
@@ -44,13 +16,13 @@ public class FlowsToGraph extends CFLGraph {
 		for(int firstArg : args) {
 			for(int secondArg : args) {
 				if(firstArg != secondArg) {
-					super.addEdge(firstArg, secondArg, passThrough, 1);
+					super.addEdge(firstArg, secondArg, passThrough, (byte)1);
 				}
 			}
 		}
 		if(ret != null) {
 			for(int arg : args) {
-				super.addEdge(arg, ret, passThrough, 1);
+				super.addEdge(arg, ret, passThrough, (byte)1);
 			}
 		}
 	}
@@ -68,17 +40,15 @@ public class FlowsToGraph extends CFLGraph {
 		this.normalCfl.add(flowsTo, flowsTo, assign);
 
 		for(String field : this.fields) {
-			//int flowsToField = normalCfl.elements.getIdByElement("flowsToField_" + field);
-			
-			// flowsToField_f(o2,o1) <- flowsTo(o2,a_c) store_f(a_c,p_c) flowsToBar(p_c,o1)
-			//normalCfl.add(this.flowsToField_(field), flowsTo, this.store_(field), flowsToBar);
-
-			// flowsTo(o2,a_c) <- flowsToField_f(o2,o1) flowsTo(o1,p_c) load_f(p_c,a_c)
-			//normalCfl.add(flowsTo, this.flowsToField_(field), flowsTo, this.load_(field));
-			
 			int store_field = normalCfl.elements.getIdByElement("store_" + field);
 			int load_field = normalCfl.elements.getIdByElement("load_" + field);
 			
+			//int flowsToField = normalCfl.elements.getIdByElement("flowsToField_" + field);
+			
+			//this.normalCfl.add(flowsToField, flowsTo, store_field, flowsToBar);
+			//this.normalCfl.add(flowsTo, flowsToField, flowsTo, load_field);
+			
+			// flowsTo(o1,b_c) <- flowsTo(o1,a_c) store_f(a_c,p_c) flowsToBar(p_c,o2) flowsTo(o2,q_c) load_f(q_c,b_c)
 			this.normalCfl.add(flowsTo, flowsTo, store_field, flowsToBar, flowsTo, load_field);
 		}
 		
@@ -96,31 +66,31 @@ public class FlowsToGraph extends CFLGraph {
 		
 		TaintFlowGraph taintFlowGraph = new TaintFlowGraph();
 		
-		for(Map.Entry<Edge,Integer> entry : this.edges.entrySet()) {
-			if(taintFlowElements.contains(entry.getKey().getElement())) {
-				String elementString = this.normalCfl.elements.getElementById(entry.getKey().getElement()); 
+		for(Edge edge : this.edges.keySet()) {
+			if(taintFlowElements.contains(edge.getElement())) {
+				String elementString = this.normalCfl.elements.getElementById(edge.getElement()); 
 				int element = taintFlowGraph.getNormalCfl().elements.getIdByElement(elementString);
 				
-				String sourceString = this.vertices.getElementById(entry.getKey().getSource());
+				String sourceString = this.vertices.getElementById(edge.getSource());
 				int source = taintFlowGraph.vertices.getIdByElement(sourceString);
 				
-				String sinkString = this.vertices.getElementById(entry.getKey().getSink());
+				String sinkString = this.vertices.getElementById(edge.getSink());
 				int sink = taintFlowGraph.vertices.getIdByElement(sinkString);
-				taintFlowGraph.addEdge(source, sink, element, entry.getValue());
+				taintFlowGraph.addEdge(source, sink, element, this.edges.get(edge));
 			}
 		}
 
-		for(Map.Entry<Edge,Integer> entry : this.getClosure().entrySet()) {
-			if(taintFlowElements.contains(entry.getKey().getElement())) {
-				String elementString = this.normalCfl.elements.getElementById(entry.getKey().getElement()); 
+		for(Edge edge : this.getClosure().keySet()) {
+			if(taintFlowElements.contains(edge.getElement())) {
+				String elementString = this.normalCfl.elements.getElementById(edge.getElement()); 
 				int element = taintFlowGraph.getNormalCfl().elements.getIdByElement(elementString);
 				
-				String sourceString = this.vertices.getElementById(entry.getKey().getSource());
+				String sourceString = this.vertices.getElementById(edge.getSource());
 				int source = taintFlowGraph.vertices.getIdByElement(sourceString);
 				
-				String sinkString = this.vertices.getElementById(entry.getKey().getSink());
+				String sinkString = this.vertices.getElementById(edge.getSink());
 				int sink = taintFlowGraph.vertices.getIdByElement(sinkString);
-				taintFlowGraph.addEdge(source, sink, element, entry.getValue());
+				taintFlowGraph.addEdge(source, sink, element, this.edges.get(edge));
 			}
 		}
 		

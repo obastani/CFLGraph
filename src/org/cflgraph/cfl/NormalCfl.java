@@ -3,7 +3,7 @@ package org.cflgraph.cfl;
 import java.util.Set;
 
 import org.cflgraph.utility.Utility.Factory;
-import org.cflgraph.utility.Utility.MultivalueMap;
+import org.cflgraph.utility.Utility.MultivalueMapInt;
 
 public class NormalCfl {
 	public Factory<String> elements = new Factory<String>();
@@ -128,9 +128,9 @@ public class NormalCfl {
 		}
 	}
 
-	private MultivalueMap<Integer,UnaryProduction> unaryProductionsByInput = new MultivalueMap<Integer,UnaryProduction>();
-	private MultivalueMap<Integer,BinaryProduction> binaryProductionsByFirstInput = new MultivalueMap<Integer,BinaryProduction>();
-	private MultivalueMap<Integer,BinaryProduction> binaryProductionsBySecondInput = new MultivalueMap<Integer,BinaryProduction>();
+	private MultivalueMapInt<UnaryProduction> unaryProductionsByInput = new MultivalueMapInt<UnaryProduction>();
+	private MultivalueMapInt<BinaryProduction> binaryProductionsByFirstInput = new MultivalueMapInt<BinaryProduction>();
+	private MultivalueMapInt<BinaryProduction> binaryProductionsBySecondInput = new MultivalueMapInt<BinaryProduction>();
 
 	public void add(UnaryProduction UnaryProduction) {
 		this.unaryProductionsByInput.add(UnaryProduction.getInput(), UnaryProduction);
@@ -192,12 +192,12 @@ public class NormalCfl {
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder();
-		for(Set<UnaryProduction> UnaryProductions : this.unaryProductionsByInput.values()) {
+		for(Set<UnaryProduction> UnaryProductions : this.unaryProductionsByInput.valueCollection()) {
 			for(UnaryProduction UnaryProduction : UnaryProductions) {
 				result.append(UnaryProduction.toString()+"\n");
 			}
 		}
-		for(Set<BinaryProduction> BinaryProductions : this.binaryProductionsByFirstInput.values()) {
+		for(Set<BinaryProduction> BinaryProductions : this.binaryProductionsByFirstInput.valueCollection()) {
 			for(BinaryProduction BinaryProduction : BinaryProductions) {
 				result.append(BinaryProduction.toString()+"\n");
 			}

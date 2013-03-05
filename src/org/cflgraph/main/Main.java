@@ -1,5 +1,7 @@
 package org.cflgraph.main;
 
+import gnu.trove.map.hash.TObjectByteHashMap;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -77,18 +79,30 @@ public class Main {
 		try {
 			String input = "butane_cs";
 			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
-			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
-
 			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
-			for(Map.Entry<Edge,Integer> entry : taintFlowGraph.getClosure().entrySet()) {
-				if(taintFlowGraph.getNormalCfl().elements.getElementById(entry.getKey().getElement()).equals("sourceSinkFlow")) {
-					pw.println(entry.getKey() + ", weight: " + entry.getValue());
+
+			/*
+			TObjectByteHashMap<Edge> flowsTo = flowsToGraph.getClosure();
+			for(Edge edge : flowsTo.keySet()) {
+				if(flowsToGraph.getNormalCfl().elements.getElementById(edge.getElement()).equals("flowsTo")) {
+					pw.println(edge + ", weight: " + flowsTo.get(edge));
 					//System.out.println(edge.getPath(true));
 					//System.out.println();
 				}
 			}
 			pw.println();
-
+			*/
+			
+			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
+			TObjectByteHashMap<Edge> taintFlow = taintFlowGraph.getClosure();
+			for(Edge edge : taintFlow.keySet()) {
+				if(taintFlowGraph.getNormalCfl().elements.getElementById(edge.getElement()).equals("sourceSinkFlow")) {
+					pw.println(edge + ", weight: " + taintFlow.get(edge));
+					//System.out.println(edge.getPath(true));
+					//System.out.println();
+				}
+			}
+			pw.println();
 			/*
 			pw.println("Rule counts for pair production rules:");
 

@@ -1,5 +1,8 @@
 package org.cflgraph.utility;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,8 +15,8 @@ import java.util.Set;
 
 public class Utility {
 	public static class Factory<V> {
-		private Map<V,Integer> idByElement = new HashMap<V,Integer>();
-		private Map<Integer,V> elementById = new HashMap<Integer,V>();
+		private TObjectIntHashMap<V> idByElement = new TObjectIntHashMap<V>();
+		private TIntObjectHashMap<V> elementById = new TIntObjectHashMap<V>();
 		
 		int curId = 0;
 		
@@ -22,7 +25,7 @@ public class Utility {
 		}
 		
 		public int getIdByElement(V v) {
-			if(this.idByElement.get(v) == null) {
+			if(!this.idByElement.containsKey(v)) {
 				this.idByElement.put(v, curId);
 				this.elementById.put(curId, v);
 				curId++;
@@ -31,38 +34,37 @@ public class Utility {
 		}
 	}
 	
-	public static class Pair<X,Y> {
-		private X x;
-		private Y y;
+	public static class PairInt {
+		private int x;
+		private int y;
 		
-		public Pair(X x, Y y) {
+		public PairInt(int x, int y) {
 			this.x = x;
 			this.y = y;
 		}
 		
-		public X getX() {
+		public int getX() {
 			return this.x;
 		}
 		
-		public Y getY() {
+		public int getY() {
 			return this.y;
 		}
 		
 		@Override
 		public String toString() {
-			return "(" + this.x.toString() + "," + this.y.toString() + ")";
+			return "(" + this.x + "," + this.y + ")";
 		}
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((x == null) ? 0 : x.hashCode());
-			result = prime * result + ((y == null) ? 0 : y.hashCode());
+			result = prime * result + x;
+			result = prime * result + y;
 			return result;
 		}
 
-		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -71,21 +73,67 @@ public class Utility {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
+			PairInt other = (PairInt) obj;
+			if (x != other.x)
+				return false;
+			if (y != other.y)
+				return false;
+			return true;
+		}
+	}
+	
+	public static class Pair<X> {
+		private X x;
+		private int y;
+		
+		public Pair(X x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+		
+		public X getX() {
+			return this.x;
+		}
+		
+		public int getY() {
+			return this.y;
+		}
+		
+		@Override
+		public String toString() {
+			return "(" + this.x.toString() + "," + this.y + ")";
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((x == null) ? 0 : x.hashCode());
+			result = prime * result + y;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			@SuppressWarnings("rawtypes")
 			Pair other = (Pair) obj;
 			if (x == null) {
 				if (other.x != null)
 					return false;
 			} else if (!x.equals(other.x))
 				return false;
-			if (y == null) {
-				if (other.y != null)
-					return false;
-			} else if (!y.equals(other.y))
+			if (y != other.y)
 				return false;
 			return true;
 		}
 	}
-
+	
 	public static class MultivalueMap<K,V> extends HashMap<K,Set<V>> {
 		private static final long serialVersionUID = 1L;
 	
@@ -104,8 +152,24 @@ public class Utility {
 		}
 	}
 	
+	public static class MultivalueMapInt<V> extends TIntObjectHashMap<Set<V>> {
+		public void add(int k, V v) {
+			Set<V> vSet = super.get(k);
+			if(vSet == null) {
+				super.put(k, vSet = new HashSet<V>());
+			}
+			vSet.add(v);
+		}
+		
+		@Override
+		public Set<V> get(int k) {
+			Set<V> vSet = super.get(k);
+			return vSet == null ? new HashSet<V>() : vSet;
+		}
+	}
+	
 	public static class Heap<T> {
-		private List<Pair<T,Integer>> heap = new ArrayList<Pair<T,Integer>>();
+		private List<Pair<T>> heap = new ArrayList<Pair<T>>();
 		private Map<T,Integer> positions = new HashMap<T,Integer>();
 		private Integer maxPriority;
 		
@@ -120,7 +184,7 @@ public class Utility {
 		public void push(T t, int priority) {
 			if(this.maxPriority == null || priority <= this.maxPriority) {
 				this.positions.put(t, this.heap.size());
-				this.heap.add(new Pair<T,Integer>(t,priority));
+				this.heap.add(new Pair<T>(t,priority));
 				this.pushUp(heap.size()-1);
 			}
 		}
@@ -157,7 +221,7 @@ public class Utility {
 				int prevPriority = this.heap.get(i).getY();
 				
 				// update priority
-				this.heap.set(i, new Pair<T,Integer>(t, priority));
+				this.heap.set(i, new Pair<T>(t, priority));
 				
 				// push up or down
 				if(prevPriority > priority) {
@@ -181,7 +245,7 @@ public class Utility {
 		}
 		
 		private void swap(int i, int j) {
-			Pair<T,Integer> pair = this.heap.get(i);
+			Pair<T> pair = this.heap.get(i);
 			this.heap.set(i, this.heap.get(j));
 			this.heap.set(j, pair);
 			this.positions.put(this.heap.get(i).getX(), i);
@@ -216,7 +280,7 @@ public class Utility {
 	    @Override
 	    public String toString() {
 	        StringBuilder s = new StringBuilder();
-	        for(Pair<T,Integer> pair : this.heap){
+	        for(Pair<T> pair : this.heap){
 	            s.append(pair.getX().toString() + ": " + pair.getY() + "\n");
 	        }
 	        return s.toString();

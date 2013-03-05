@@ -24,34 +24,6 @@ public class TaintFlowGraph extends CFLGraph {
 		// sourceSinkFlow(src,sink) -> taints(src,o), flowsTo(o,p), sink(p,sink)
 		this.normalCfl.add(sourceSinkFlow, taints, flowsTo, sink);
 	}
-	
-	// Elements for annotated flows
-	/*
-	private Element passThrough = new Element("passThrough");
-	private Element source = new Element("source");
-	private Element sink = new Element("sink");
-
-	private Element flowsTo = new Element("flowsTo");
-	private Element flowsToBar = new Element("flowsToBar");
-
-	// Elements for annotated flows
-	private Element sourceSinkFlow = new Element("sourceSinkFlow");
-	private Element taints = new Element("taints");
-
-	// various functions
-
-	public Element getSource() {
-		return this.source;
-	}
-
-	public Element getSink() {
-		return this.sink;
-	}
-
-	public Element getPassThrough() {
-		return this.passThrough;
-	}
-	*/
 
 	@Override
 	public NormalCfl getNormalCfl() {
