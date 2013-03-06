@@ -5,68 +5,20 @@ import java.util.Set;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
 public class NormalCfl {
-	/*
-	public NormalCFL(BufferedReader input) throws IOException {
-		String line;
-		while((line = input.readLine()) != null) {
-			String[] params = line.split(" ");
-			if(params.length >= 2) {
-				List<Element> inputs = new ArrayList<Element>();
-				for(int i=1; i<params.length; i++) {
-					inputs.add(new Element(params[i]));
-				}
-				this.add(new Element(params[0]), inputs);
-			}
-		}
-	}
-	*/
-	
-	public static class Element {
-		private String name;
-		
-		public Element(String name) {
-			this.name = name;
-		}
-		
-		public String getName() {
-			return this.name;
-		}
-		
-		@Override
-		public String toString() {
-			return this.name;
-		}
-		
-		public int hashCode() {
-			return this.name.hashCode();
-		}
-		
-		public boolean equals(Object object) {
-			if(this == object) {
-				return true;
-			} else if(object == null || this.getClass() != object.getClass()) {
-				return false;
-			} else {
-				Element element = (Element)object;
-				return this.name.equals(element.getName());
-			}
-		}
-	}
-
 	public static class UnaryProduction {
-		private Element output;
-		private Element input;
+		private String output;
+		private String input;
 
-		public UnaryProduction(Element output, Element input) {
+		public UnaryProduction(String output, String input) {
 			this.output = output;
 			this.input = input;
 		}
 
-		public Element getOutput() {
+		public String getOutput() {
 			return this.output;
 		}
 
-		public Element getInput() {
+		public String getInput() {
 			return this.input;
 		}
 
@@ -109,26 +61,26 @@ public class NormalCfl {
 	}
 
 	public static class BinaryProduction {
-		private Element output;
+		private String output;
 
-		private Element firstInput;
-		private Element secondInput;
+		private String firstInput;
+		private String secondInput;
 
-		public BinaryProduction(Element output, Element firstInput, Element secondInput) {
+		public BinaryProduction(String output, String firstInput, String secondInput) {
 			this.output = output;
 			this.firstInput = firstInput;
 			this.secondInput = secondInput;
 		}
 
-		public Element getOutput() {
+		public String getOutput() {
 			return this.output;
 		}
 
-		public Element getFirstInput() {
+		public String getFirstInput() {
 			return this.firstInput;
 		}
 
-		public Element getSecondInput() {
+		public String getSecondInput() {
 			return this.secondInput;
 		}
 
@@ -178,15 +130,15 @@ public class NormalCfl {
 		}
 	}
 
-	private MultivalueMap<Element,UnaryProduction> unaryProductionsByInput = new MultivalueMap<Element,UnaryProduction>();
-	private MultivalueMap<Element,BinaryProduction> binaryProductionsByFirstInput = new MultivalueMap<Element,BinaryProduction>();
-	private MultivalueMap<Element,BinaryProduction> binaryProductionsBySecondInput = new MultivalueMap<Element,BinaryProduction>();
+	private MultivalueMap<String,UnaryProduction> unaryProductionsByInput = new MultivalueMap<String,UnaryProduction>();
+	private MultivalueMap<String,BinaryProduction> binaryProductionsByFirstInput = new MultivalueMap<String,BinaryProduction>();
+	private MultivalueMap<String,BinaryProduction> binaryProductionsBySecondInput = new MultivalueMap<String,BinaryProduction>();
 
 	public void add(UnaryProduction UnaryProduction) {
 		this.unaryProductionsByInput.add(UnaryProduction.getInput(), UnaryProduction);
 	}
 
-	public Set<UnaryProduction> getUnaryProductionsByInput(Element input) {
+	public Set<UnaryProduction> getUnaryProductionsByInput(String input) {
 		return this.unaryProductionsByInput.get(input);
 	}
 
@@ -195,15 +147,19 @@ public class NormalCfl {
 		this.binaryProductionsBySecondInput.add(binaryProduction.getSecondInput(), binaryProduction);
 	}
 
-	public Set<BinaryProduction> getBinaryProductionsByFirstInput(Element input) {
+	public Set<BinaryProduction> getBinaryProductionsByFirstInput(String input) {
 		return this.binaryProductionsByFirstInput.get(input);
 	}
 
-	public Set<BinaryProduction> getBinaryProductionsBySecondInput(Element input) {
+	public Set<BinaryProduction> getBinaryProductionsBySecondInput(String input) {
 		return this.binaryProductionsBySecondInput.get(input);
 	}
+	
+	public void add(String output, String ... inputs) {
+		this.add(true, output, inputs);
+	}
 
-	public void add(Element output, Element ... inputs) {
+	public void add(boolean forward, String output, String ... inputs) {
 		assert inputs.length > 0;
 		switch(inputs.length) {
 		case 0:
@@ -215,25 +171,47 @@ public class NormalCfl {
 			this.add(new BinaryProduction(output, inputs[0], inputs[1]));
 			break;
 		default:
-			Element firstInput = inputs[0];
-			Element secondInput = inputs[1];
+			if(forward) {
+				String firstInput = inputs[0];
+				String secondInput = inputs[1];
 
-			String outputString = firstInput.getName() + "^" + secondInput.getName();
-			Element tempOutput = new Element(outputString);
-			this.add(new BinaryProduction(tempOutput , firstInput, secondInput));
-
-			for(int i=2; i<inputs.length-1; i++) {
-				firstInput = tempOutput;
-				secondInput = inputs[i];
-				outputString += "^" + secondInput.getName();
-				tempOutput  = new Element(outputString);
+				String outputString = firstInput + "^" + secondInput;
+				String tempOutput = new String(outputString);
 				this.add(new BinaryProduction(tempOutput , firstInput, secondInput));
-			}
 
-			firstInput = tempOutput ;
-			secondInput = inputs[inputs.length-1];
-			tempOutput  = output;
-			this.add(new BinaryProduction(tempOutput , firstInput, secondInput));
+				for(int i=2; i<inputs.length-1; i++) {
+					firstInput = tempOutput;
+					secondInput = inputs[i];
+					outputString += "^" + secondInput;
+					tempOutput  = new String(outputString);
+					this.add(new BinaryProduction(tempOutput , firstInput, secondInput));
+				}
+
+				firstInput = tempOutput ;
+				secondInput = inputs[inputs.length-1];
+				tempOutput  = output;
+				this.add(new BinaryProduction(tempOutput , firstInput, secondInput));
+			} else {
+				String firstInput = inputs[inputs.length-1];
+				String secondInput = inputs[inputs.length-2];
+	
+				String outputString = secondInput + "^" + firstInput;
+				String tempOutput = new String(outputString);
+				this.add(new BinaryProduction(tempOutput , secondInput, firstInput));
+	
+				for(int i=inputs.length-3; i>0; i--) {
+					firstInput = tempOutput;
+					secondInput = inputs[i];
+					outputString = secondInput + "^" + outputString;
+					tempOutput  = new String(outputString);
+					this.add(new BinaryProduction(tempOutput, secondInput, firstInput));
+				}
+	
+				firstInput = tempOutput;
+				secondInput = inputs[0];
+				tempOutput  = output;
+				this.add(new BinaryProduction(tempOutput, secondInput, firstInput));
+			}
 			break;
 		}
 	}

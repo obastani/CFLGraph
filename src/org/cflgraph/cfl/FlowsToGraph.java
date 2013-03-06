@@ -4,48 +4,45 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.cflgraph.cfl.NormalCfl.Element;
-
 public class FlowsToGraph extends CFLGraph {
-	private static final long serialVersionUID = 3857460445048824005L;
 
 	private Set<String> fields = new HashSet<String>();
 	
 	// elements
-	private Element new_element = new Element("new");
-	private Element assign = new Element("assign");
-	private Element store_(String field) { return new Element("store_" + field); }
-	private Element load_(String field) { return new Element("load_" + field); }
+	private String new_element = new String("new");
+	private String assign = new String("assign");
+	private String store_(String field) { return new String("store_" + field); }
+	private String load_(String field) { return new String("load_" + field); }
 	
-	private Element flowsTo = new Element("flowsTo");
-	private Element flowsToBar = new Element("flowsToBar");
-	private Element flowsToField_(String field) { return new Element("flowsToField_" + field); }
+	private String flowsTo = new String("flowsTo");
+	private String flowsToBar = new String("flowsToBar");
+	private String flowsToField_(String field) { return new String("flowsToField_" + field); }
 	
 	// elements for annotated flows
-	private Element passThrough = new Element("passThrough");
-	private Element source = new Element("source");
-	private Element sink = new Element("sink");	
+	private String passThrough = new String("passThrough");
+	private String source = new String("source");
+	private String sink = new String("sink");	
 	
 	// various functions
-	public Element getAssign() { return this.assign; }
-	public Element getNew() { return this.new_element; }	
+	public String getAssign() { return this.assign; }
+	public String getNew() { return this.new_element; }	
 	public void addField(String field) { this.fields.add(field); }	
-	public Element getLoad(String field) { return this.load_(field); }	
-	public Element getStore(String field) { return this.store_(field); }
-	public Element getSource() { return this.source; }
-	public Element getSink() { return this.sink; }
-	public Element getPassThrough() { return this.passThrough; }
+	public String getLoad(String field) { return this.load_(field); }	
+	public String getStore(String field) { return this.store_(field); }
+	public String getSource() { return this.source; }
+	public String getSink() { return this.sink; }
+	public String getPassThrough() { return this.passThrough; }
 	
-	public void addStubMethod(Set<Vertex> args, Vertex ret, String methodSignature) {		
-		for(Vertex firstArg : args) {
-			for(Vertex secondArg : args) {
+	public void addStubMethod(Set<String> args, String ret, String methodSignature) {		
+		for(String firstArg : args) {
+			for(String secondArg : args) {
 				if(!firstArg.equals(secondArg)) {
 					super.addEdge(firstArg, secondArg, this.passThrough, 1);
 				}
 			}
 		}
 		if(ret != null) {
-			for(Vertex arg : args) {
+			for(String arg : args) {
 				super.addEdge(arg, ret, this.passThrough, 1);
 			}
 		}
@@ -62,34 +59,34 @@ public class FlowsToGraph extends CFLGraph {
 
 		for(String field : this.fields) {
 			// flowsToField_f(o2,o1) <- flowsTo(o2,a_c) store_f(a_c,p_c) flowsToBar(p_c,o1)
-			normalCfl.add(this.flowsToField_(field), this.flowsTo, this.store_(field), this.flowsToBar);
+			normalCfl.add(false, this.flowsToField_(field), this.flowsTo, this.store_(field), this.flowsToBar);
 
 			// flowsTo(o2,a_c) <- flowsToField_f(o2,o1) flowsTo(o1,p_c) load_f(p_c,a_c)
-			normalCfl.add(this.flowsTo, this.flowsToField_(field), this.flowsTo, this.load_(field));
+			normalCfl.add(false, this.flowsTo, this.flowsToField_(field), this.flowsTo, this.load_(field));
 		}
 		
 		return normalCfl;
 	}
 	
 	public TaintFlowGraph getTaintFlowGraph() {
-		Set<Element> taintFlowElements = new HashSet<Element>();
-		taintFlowElements.add(this.source);
-		taintFlowElements.add(this.sink);
-		taintFlowElements.add(this.passThrough);
+		Set<String> taintFlowStrings = new HashSet<String>();
+		taintFlowStrings.add(this.source);
+		taintFlowStrings.add(this.sink);
+		taintFlowStrings.add(this.passThrough);
 		
-		taintFlowElements.add(this.flowsTo);
-		taintFlowElements.add(this.flowsToBar);
+		taintFlowStrings.add(this.flowsTo);
+		taintFlowStrings.add(this.flowsToBar);
 				
 		TaintFlowGraph taintFlowGraph = new TaintFlowGraph();
 		
 		for(Map.Entry<Edge,EdgeData> entry : this.edges.entrySet()) {
-			if(taintFlowElements.contains(entry.getKey().getElement())) {
+			if(taintFlowStrings.contains(entry.getKey().getElement())) {
 				taintFlowGraph.addEdge(entry.getKey(), entry.getValue().getWeight());
 			}
 		}
 
 		for(Map.Entry<Edge, EdgeData> entry : this.getClosure().entrySet()) {
-			if(taintFlowElements.contains(entry.getKey().getElement())) {
+			if(taintFlowStrings.contains(entry.getKey().getElement())) {
 				taintFlowGraph.addEdge(entry.getKey(), entry.getValue().getWeight());
 			}
 		}

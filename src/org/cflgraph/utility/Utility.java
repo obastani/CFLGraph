@@ -87,22 +87,11 @@ public class Utility {
 	public static class Heap<T> {
 		private List<Pair<T,Integer>> heap = new ArrayList<Pair<T,Integer>>();
 		private Map<T,Integer> positions = new HashMap<T,Integer>();
-		private Integer maxPriority;
-		
-		public Heap() {
-			this.maxPriority = null;
-		}
-		
-		public Heap(int maxPriority) {
-			this.maxPriority = maxPriority;
-		}
 		
 		public void push(T t, int priority) {
-			if(this.maxPriority == null || priority <= this.maxPriority) {
-				this.positions.put(t, this.heap.size());
-				this.heap.add(new Pair<T,Integer>(t,priority));
-				this.pushUp(heap.size()-1);
-			}
+			this.positions.put(t, this.heap.size());
+			this.heap.add(new Pair<T,Integer>(t,priority));
+			this.pushUp(heap.size()-1);
 		}
 		
 		public T pop() {

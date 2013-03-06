@@ -9,9 +9,7 @@ import java.util.Map;
 
 import org.cflgraph.cfl.CFLGraph.Edge;
 import org.cflgraph.cfl.CFLGraph.EdgeData;
-import org.cflgraph.cfl.CFLGraph.Vertex;
 import org.cflgraph.cfl.FlowsToGraph;
-import org.cflgraph.cfl.NormalCfl.Element;
 import org.cflgraph.cfl.TaintFlowGraph;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
@@ -22,17 +20,17 @@ public class Main {
 		FlowsToGraph graph = new FlowsToGraph();
 		
 		// stub method arguments
-		MultivalueMap<String,Vertex> methodArgs = new MultivalueMap<String,Vertex>();
-		Map<String,Vertex> methodRet = new HashMap<String,Vertex>();
+		MultivalueMap<String,String> methodArgs = new MultivalueMap<String,String>();
+		Map<String,String> methodRet = new HashMap<String,String>();
 		
 		String line;
 		while((line = input.readLine()) != null) {
 			String[] tokens = line.split(" ");
 			if(tokens.length == 3) {
-				Vertex source = new Vertex(tokens[0]);
-				Vertex sink = new Vertex(tokens[1]);
+				String source = tokens[0];
+				String sink = tokens[1];
 
-				Element label = null;
+				String label = null;
 				if(tokens[2].startsWith("new")) {
 					label = graph.getNew();
 				} else if(tokens[2].startsWith("load_")) {
@@ -53,10 +51,10 @@ public class Main {
 					label = graph.getPassThrough();
 				} else if(tokens[2].startsWith("stubArg")) {
 					//graph.addMethod(tokens[1]);
-					methodArgs.add(tokens[1], new Vertex(tokens[0]));
+					methodArgs.add(tokens[1], tokens[0]);
 					label = null;
 				} else if(tokens[2].startsWith("stubRet")) {
-					methodRet.put(tokens[0], new Vertex(tokens[1]));
+					methodRet.put(tokens[0], tokens[1]);
 					label = null;
 				}
 				if(label != null) {
@@ -73,17 +71,28 @@ public class Main {
 	
 	public static void main(String[] args) {
 		try {
-			String input = "butane_cs";
+			String input = "opengps";
 			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
-
+			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
 			long time = System.currentTimeMillis();
+			
+			/*
+			Map<Edge,EdgeData> flowsTo = flowsToGraph.getClosure();
+			for(Map.Entry<Edge,EdgeData> entry : flowsTo.entrySet()) {
+				if(entry.getKey().getElement().equals("flowsTo")) {
+					pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
+					//System.out.println(edge.getPath(true));
+					//System.out.println();
+				}
+			}
+			pw.println();
+			*/
+
 			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
 			Map<Edge,EdgeData> taintFlow = taintFlowGraph.getClosure();
-			System.out.println("time: " + (System.currentTimeMillis() - time));
 			
-			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
 			for(Map.Entry<Edge,EdgeData> entry : taintFlow.entrySet()) {
-				if(entry.getKey().getElement().getName().equals("sourceSinkFlow")) {
+				if(entry.getKey().getElement().equals("sourceSinkFlow")) {
 					pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
 					//System.out.println(edge.getPath(true));
 					//System.out.println();
@@ -94,17 +103,18 @@ public class Main {
 			/*
 			pw.println("Rule counts for pair production rules:");
 
-			for(Map.Entry<PairProduction,Integer> entry : cflGraph.getPairProductionCounts().sortedKeySet()) {
+			for(Map.Entry<BinaryProduction,Integer> entry : flowsToGraph.getBinaryProductionCounts().sortedKeySet()) {
 				pw.println(entry.getKey() + " : " + entry.getValue());
 			}
 			pw.println();
 			pw.println("Rule counts for single production rules:");
-			for(Map.Entry<SingleProduction,Integer> entry : cflGraph.getSingleProductionCounts().sortedKeySet()) {
+			for(Map.Entry<UnaryProduction,Integer> entry : flowsToGraph.getUnaryProductionCounts().sortedKeySet()) {
 				pw.println(entry.getKey() + " : " + entry.getValue());
 			}
 			*/
 			
 			pw.close();
+			System.out.println("time: " + (System.currentTimeMillis() - time));
 			
 		} catch(Exception e) {
 			e.printStackTrace();

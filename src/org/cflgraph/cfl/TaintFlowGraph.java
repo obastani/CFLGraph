@@ -2,34 +2,31 @@ package org.cflgraph.cfl;
 
 import java.util.Map;
 
-import org.cflgraph.cfl.NormalCfl.Element;
-
 public class TaintFlowGraph extends CFLGraph {
-	private static final long serialVersionUID = 521959041324489575L;
 	
-	// Elements for annotated flows
-	private Element passThrough = new Element("passThrough");
-	private Element source = new Element("source");
-	private Element sink = new Element("sink");
+	// Strings for annotated flows
+	private String passThrough = new String("passThrough");
+	private String source = new String("source");
+	private String sink = new String("sink");
 
-	private Element flowsTo = new Element("flowsTo");
-	private Element flowsToBar = new Element("flowsToBar");
+	private String flowsTo = new String("flowsTo");
+	private String flowsToBar = new String("flowsToBar");
 
-	// Elements for annotated flows
-	private Element sourceSinkFlow = new Element("sourceSinkFlow");
-	private Element taints = new Element("taints");
+	// Strings for annotated flows
+	private String sourceSinkFlow = new String("sourceSinkFlow");
+	private String taints = new String("taints");
 
 	// various functions
 
-	public Element getSource() {
+	public String getSource() {
 		return this.source;
 	}
 
-	public Element getSink() {
+	public String getSink() {
 		return this.sink;
 	}
 
-	public Element getPassThrough() {
+	public String getPassThrough() {
 		return this.passThrough;
 	}
 
