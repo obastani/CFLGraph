@@ -3,6 +3,7 @@ package org.cflgraph.cfl;
 import java.util.Set;
 
 import org.cflgraph.utility.Utility.MultivalueMap;
+import org.cflpath.utility.Utility.Pair;
 
 public class NormalCfl {
 	public static class UnaryProduction {
@@ -133,6 +134,7 @@ public class NormalCfl {
 	private MultivalueMap<String,UnaryProduction> unaryProductionsByInput = new MultivalueMap<String,UnaryProduction>();
 	private MultivalueMap<String,BinaryProduction> binaryProductionsByFirstInput = new MultivalueMap<String,BinaryProduction>();
 	private MultivalueMap<String,BinaryProduction> binaryProductionsBySecondInput = new MultivalueMap<String,BinaryProduction>();
+	private MultivalueMap<Pair<String,String>,BinaryProduction> binaryProductionsByInputs = new MultivalueMap<Pair<String,String>,BinaryProduction>(); 
 
 	public void add(UnaryProduction UnaryProduction) {
 		this.unaryProductionsByInput.add(UnaryProduction.getInput(), UnaryProduction);
@@ -145,6 +147,7 @@ public class NormalCfl {
 	public void add(BinaryProduction binaryProduction) {
 		this.binaryProductionsByFirstInput.add(binaryProduction.getFirstInput(), binaryProduction);
 		this.binaryProductionsBySecondInput.add(binaryProduction.getSecondInput(), binaryProduction);
+		this.binaryProductionsByInputs.add(new Pair<String,String>(binaryProduction.getFirstInput(), binaryProduction.getSecondInput()), binaryProduction);
 	}
 
 	public Set<BinaryProduction> getBinaryProductionsByFirstInput(String input) {
@@ -153,6 +156,10 @@ public class NormalCfl {
 
 	public Set<BinaryProduction> getBinaryProductionsBySecondInput(String input) {
 		return this.binaryProductionsBySecondInput.get(input);
+	}
+	
+	public Set<BinaryProduction> getBinaryProductionsByInputs(String firstInput, String secondInput) {
+		return this.binaryProductionsByInputs.get(new Pair<String,String>(firstInput, secondInput));
 	}
 	
 	public void add(String output, String ... inputs) {

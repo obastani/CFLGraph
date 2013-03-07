@@ -63,7 +63,7 @@ public class Main {
 			}
 		}
 		for(String methodName : methodArgs.keySet()) {
-			graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
+			//graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
 		}
 		
 		return graph;
@@ -71,7 +71,7 @@ public class Main {
 	
 	public static void main(String[] args) {
 		try {
-			String input = "opengps";
+			String input = "connectbot_cs";
 			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
 			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
 			long time = System.currentTimeMillis();

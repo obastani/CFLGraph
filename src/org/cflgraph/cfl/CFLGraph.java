@@ -7,7 +7,6 @@ import org.cflgraph.cfl.NormalCfl.BinaryProduction;
 import org.cflgraph.cfl.NormalCfl.UnaryProduction;
 import org.cflgraph.utility.Utility.Heap;
 import org.cflgraph.utility.Utility.MultivalueMap;
-import org.cflgraph.utility.Utility.Pair;
 
 public class CFLGraph {
 	protected Map<Edge,EdgeData> edges = new HashMap<Edge,EdgeData>();
@@ -198,8 +197,8 @@ public class CFLGraph {
 	public Map<Edge,EdgeData> getClosure(NormalCfl cfl) {
 
 		// maps from the minimum graph elements to their paths
-		MultivalueMap<Pair<String,String>,Edge> minEdgesBySourceString = new MultivalueMap<Pair<String,String>,Edge>();
-		MultivalueMap<Pair<String,String>,Edge> minEdgesBySinkString = new MultivalueMap<Pair<String,String>,Edge>();
+		MultivalueMap<String,Edge> minEdgesBySource = new MultivalueMap<String,Edge>();
+		MultivalueMap<String,Edge> minEdgesBySink = new MultivalueMap<String,Edge>();
 
 		Heap<Edge> curMinEdgeQueue = new Heap<Edge>(); // stores the current minimum graph elements left to be processed
 		Map<Edge,EdgeData> curMinEdgeData = new HashMap<Edge,EdgeData>(); // stores the current weight of a given edge		
@@ -225,8 +224,8 @@ public class CFLGraph {
 			i++;
 
 			// step 2b: add the minimum element to the map
-			minEdgesBySourceString.add(new Pair<String,String>(minEdge.getSource(), minEdge.getElement()), minEdge);
-			minEdgesBySinkString.add(new Pair<String,String>(minEdge.getSink(), minEdge.getElement()), minEdge);
+			minEdgesBySource.add(minEdge.getSource(), minEdge);
+			minEdgesBySink.add(minEdge.getSink(), minEdge);
 
 			// TODO: fix temporary hack
 			if(minEdge.getElement().equals(new String("flowsTo"))) {
@@ -252,8 +251,8 @@ public class CFLGraph {
 			}
 
 			// step 2d: update the minimum path for all pair productions using that element as the first input
-			for(BinaryProduction binaryProduction : cfl.getBinaryProductionsByFirstInput(minEdge.getElement())) {
-				for(Edge secondEdge : minEdgesBySourceString.get(new Pair<String,String>(minEdge.getSink(), binaryProduction.getSecondInput()))) {
+			for(Edge secondEdge : minEdgesBySource.get(minEdge.getSink())) {
+				for(BinaryProduction binaryProduction : cfl.getBinaryProductionsByInputs(minEdge.getElement(), secondEdge.getElement())) {
 					Edge newEdge = new Edge(minEdge.getSource(), secondEdge.getSink(), binaryProduction.getOutput());
 					EdgeData curData = curMinEdgeData.get(newEdge);
 					EdgeData newData = new EdgeData(newEdge, curMinEdgeData.get(minEdge), curMinEdgeData.get(secondEdge));
@@ -278,8 +277,8 @@ public class CFLGraph {
 			}
 
 			// step 2e: update the minimum path for all pair productions using that element as the second input
-			for(BinaryProduction binaryProduction : cfl.getBinaryProductionsBySecondInput(minEdge.getElement())) {
-				for(Edge firstEdge : minEdgesBySinkString.get(new Pair<String,String>(minEdge.getSource(), binaryProduction.getFirstInput()))) {
+			for(Edge firstEdge : minEdgesBySink.get(minEdge.getSource())) {
+				for(BinaryProduction binaryProduction : cfl.getBinaryProductionsByInputs(firstEdge.getElement(), minEdge.getElement())) {
 					Edge newEdge = new Edge(firstEdge.getSource(), minEdge.getSink(), binaryProduction.getOutput());
 					EdgeData curData = curMinEdgeData.get(newEdge);
 					EdgeData newData = new EdgeData(newEdge, curMinEdgeData.get(firstEdge), curMinEdgeData.get(minEdge));
