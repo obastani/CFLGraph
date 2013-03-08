@@ -2,9 +2,11 @@ package org.cflgraph.cfl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.cflgraph.cfl.NormalCfl.BinaryProduction;
 import org.cflgraph.cfl.NormalCfl.UnaryProduction;
+import org.cflgraph.utility.Utility.Counter;
 import org.cflgraph.utility.Utility.Heap;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
@@ -193,6 +195,8 @@ public class CFLGraph {
 		}
 	}
 
+	private Counter<String> elementCounts = new Counter<String>();
+	
 	// run Knuth's algorithms
 	public Map<Edge,EdgeData> getClosure(NormalCfl cfl) {
 
@@ -226,18 +230,47 @@ public class CFLGraph {
 			// step 2b: add the minimum element to the map
 			minEdgesBySource.add(minEdge.getSource(), minEdge);
 			minEdgesBySink.add(minEdge.getSink(), minEdge);
+			elementCounts.incrementCount(minEdge.getElement());
 
 			// TODO: fix temporary hack
-			if(minEdge.getElement().equals(new String("flowsTo"))) {
-				Edge barEdge = new Edge(minEdge.getSink(), minEdge.getSource(), new String(minEdge.getElement() + "Bar"));
-				curMinEdgeQueue.update(barEdge, curMinEdgeData.get(minEdge).weight);
-				curMinEdgeData.put(barEdge, new EdgeData(barEdge, curMinEdgeData.get(minEdge), false));
+			if(minEdge.element.equals("flowsTo")) {
+				//Edge barEdge = new Edge(minEdge.getSink(), minEdge.getSource(), "flowsToBar");
+				//curMinEdgeQueue.update(barEdge, curMinEdgeData.get(minEdge).weight);
+				//curMinEdgeData.put(barEdge, new EdgeData(barEdge, curMinEdgeData.get(minEdge), false));
+				
+				for(Edge firstEdge : minEdgesBySink.get(minEdge.sink)) {
+					for(BinaryProduction binaryProduction : cfl.getBinaryProductionsByInputs(firstEdge.element, "flowsToBar")) {
+						Edge newEdge = new Edge(firstEdge.source, minEdge.source, binaryProduction.getOutput());
+						EdgeData curData = curMinEdgeData.get(newEdge);
+						EdgeData newData = new EdgeData(newEdge, 0);
+
+						if(curData == null || newData.weight < curData.weight) {
+							curMinEdgeQueue.update(newEdge, newData.weight);
+							curMinEdgeData.put(newEdge, newData);
+						}
+					}
+				}
+			}
+			
+			if(minEdge.element.startsWith("store_") && !minEdge.element.contains("^")) {
+				for(Edge secondEdge : minEdgesBySink.get(minEdge.sink)) {
+					for(BinaryProduction binaryProduction : cfl.getBinaryProductionsByInputs(minEdge.element, "flowsToBar")) {
+						Edge newEdge = new Edge(minEdge.source, secondEdge.source, binaryProduction.getOutput());
+						EdgeData curData = curMinEdgeData.get(newEdge);
+						EdgeData newData = new EdgeData(newEdge, 0);
+
+						if(curData == null || newData.weight < curData.weight) {
+							curMinEdgeQueue.update(newEdge, newData.weight);
+							curMinEdgeData.put(newEdge, newData);
+						}
+					}
+				}
 			}
 
 			// step 2c: update the minimum path for all single productions using that element
 			for(UnaryProduction unaryProduction : cfl.getUnaryProductionsByInput(minEdge.getElement())) {
 				Edge newEdge = new Edge(minEdge.getSource(), minEdge.getSink(), unaryProduction.getOutput());
-				EdgeData curData = curMinEdgeData.get(newEdge);
+				EdgeData curData = curMinEdgeData.get(newEdge);				
 				EdgeData newData = curMinEdgeData.get(minEdge);
 				/*
 				if(curData == null) {
@@ -302,7 +335,13 @@ public class CFLGraph {
 				}
 			}
 		}
-		
+
+		int k=0;
+		for(Entry<String, Integer> e : elementCounts.sortedKeySet()) {
+			System.out.println(e.getKey() + ": " + e.getValue());
+			k++;
+			if(k > 3) break;
+		}
 		System.out.println(i);
 
 		return curMinEdgeData;

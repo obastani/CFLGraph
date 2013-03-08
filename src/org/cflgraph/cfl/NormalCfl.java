@@ -3,7 +3,7 @@ package org.cflgraph.cfl;
 import java.util.Set;
 
 import org.cflgraph.utility.Utility.MultivalueMap;
-import org.cflpath.utility.Utility.Pair;
+import org.cflgraph.utility.Utility.PairString;
 
 public class NormalCfl {
 	public static class UnaryProduction {
@@ -134,7 +134,7 @@ public class NormalCfl {
 	private MultivalueMap<String,UnaryProduction> unaryProductionsByInput = new MultivalueMap<String,UnaryProduction>();
 	private MultivalueMap<String,BinaryProduction> binaryProductionsByFirstInput = new MultivalueMap<String,BinaryProduction>();
 	private MultivalueMap<String,BinaryProduction> binaryProductionsBySecondInput = new MultivalueMap<String,BinaryProduction>();
-	private MultivalueMap<Pair<String,String>,BinaryProduction> binaryProductionsByInputs = new MultivalueMap<Pair<String,String>,BinaryProduction>(); 
+	private MultivalueMap<PairString,BinaryProduction> binaryProductionsByInputs = new MultivalueMap<PairString,BinaryProduction>(); 
 
 	public void add(UnaryProduction UnaryProduction) {
 		this.unaryProductionsByInput.add(UnaryProduction.getInput(), UnaryProduction);
@@ -147,7 +147,7 @@ public class NormalCfl {
 	public void add(BinaryProduction binaryProduction) {
 		this.binaryProductionsByFirstInput.add(binaryProduction.getFirstInput(), binaryProduction);
 		this.binaryProductionsBySecondInput.add(binaryProduction.getSecondInput(), binaryProduction);
-		this.binaryProductionsByInputs.add(new Pair<String,String>(binaryProduction.getFirstInput(), binaryProduction.getSecondInput()), binaryProduction);
+		this.binaryProductionsByInputs.add(new PairString(binaryProduction.getFirstInput(), binaryProduction.getSecondInput()), binaryProduction);
 	}
 
 	public Set<BinaryProduction> getBinaryProductionsByFirstInput(String input) {
@@ -159,7 +159,7 @@ public class NormalCfl {
 	}
 	
 	public Set<BinaryProduction> getBinaryProductionsByInputs(String firstInput, String secondInput) {
-		return this.binaryProductionsByInputs.get(new Pair<String,String>(firstInput, secondInput));
+		return this.binaryProductionsByInputs.get(new PairString(firstInput, secondInput));
 	}
 	
 	public void add(String output, String ... inputs) {

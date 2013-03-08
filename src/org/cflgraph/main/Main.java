@@ -71,22 +71,22 @@ public class Main {
 	
 	public static void main(String[] args) {
 		try {
-			String input = "connectbot_cs";
+			String input = "opengps";
 			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
-			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
+			//PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
 			long time = System.currentTimeMillis();
 			
-			/*
 			Map<Edge,EdgeData> flowsTo = flowsToGraph.getClosure();
 			for(Map.Entry<Edge,EdgeData> entry : flowsTo.entrySet()) {
 				if(entry.getKey().getElement().equals("flowsTo")) {
-					pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
+					//pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
 					//System.out.println(edge.getPath(true));
 					//System.out.println();
 				}
 			}
-			pw.println();
-			*/
+			//pw.println();
+
+			/*
 
 			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
 			Map<Edge,EdgeData> taintFlow = taintFlowGraph.getClosure();
@@ -113,7 +113,7 @@ public class Main {
 			}
 			*/
 			
-			pw.close();
+			//pw.close();
 			System.out.println("time: " + (System.currentTimeMillis() - time));
 			
 		} catch(Exception e) {
