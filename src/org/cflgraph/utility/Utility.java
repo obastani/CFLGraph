@@ -153,6 +153,7 @@ public class Utility {
 				this.swap(0, this.heap.size()-1);
 				T t = this.heap.remove(this.heap.size()-1).getX();
 				this.positions.remove(t);
+				this.pushDown(0);
 				return t;
 			} else {
 				return null;

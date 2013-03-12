@@ -30,8 +30,8 @@ public class TaintFlowGraph extends CFLGraph {
 		return this.passThrough;
 	}
 
-	public NormalCfl getTaintFlowCfl() {
-		NormalCfl normalCfl = new NormalCfl();
+	public NormalCFL getTaintFlowCfl() {
+		NormalCFL normalCfl = new NormalCFL();
 		
 		// taints(src,o) -> source(src,v), flowsToBar(v,o)
 		normalCfl.add(this.taints, this.source, this.flowsToBar);
@@ -45,5 +45,9 @@ public class TaintFlowGraph extends CFLGraph {
 
 	public Map<Edge,EdgeData> getClosure() {
 		return super.getClosure(this.getTaintFlowCfl());
+	}
+
+	public Map<Edge,EdgeData> getClosure2() {
+		return super.getClosure2(this.getTaintFlowCfl());
 	}
 }

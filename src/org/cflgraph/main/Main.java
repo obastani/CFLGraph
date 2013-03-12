@@ -63,7 +63,7 @@ public class Main {
 			}
 		}
 		for(String methodName : methodArgs.keySet()) {
-			//graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
+			graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
 		}
 		
 		return graph;
@@ -71,25 +71,26 @@ public class Main {
 	
 	public static void main(String[] args) {
 		try {
-			String input = "opengps";
+			String input = "butane_cs";
 			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
-			//PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
+			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
 			long time = System.currentTimeMillis();
-			
+
+			/*
 			Map<Edge,EdgeData> flowsTo = flowsToGraph.getClosure();
 			for(Map.Entry<Edge,EdgeData> entry : flowsTo.entrySet()) {
 				if(entry.getKey().getElement().equals("flowsTo")) {
-					//pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
+					pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
 					//System.out.println(edge.getPath(true));
 					//System.out.println();
 				}
 			}
-			//pw.println();
-
-			/*
+			pw.println();
+			
+			*/
 
 			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
-			Map<Edge,EdgeData> taintFlow = taintFlowGraph.getClosure();
+			Map<Edge,EdgeData> taintFlow = taintFlowGraph.getClosure2();
 			
 			for(Map.Entry<Edge,EdgeData> entry : taintFlow.entrySet()) {
 				if(entry.getKey().getElement().equals("sourceSinkFlow")) {
@@ -113,7 +114,7 @@ public class Main {
 			}
 			*/
 			
-			//pw.close();
+			pw.close();
 			System.out.println("time: " + (System.currentTimeMillis() - time));
 			
 		} catch(Exception e) {

@@ -48,8 +48,8 @@ public class FlowsToGraph extends CFLGraph {
 		}
 	}
 	
-	public NormalCfl getFlowsToCfl() {
-		NormalCfl normalCfl = new NormalCfl();
+	public NormalCFL getFlowsToCfl() {
+		NormalCFL normalCfl = new NormalCFL();
 
 		// flowsTo(o,a_c) <- new(o,a_c)
 		normalCfl.add(this.flowsTo, this.new_element);
