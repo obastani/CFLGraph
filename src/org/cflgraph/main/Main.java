@@ -5,19 +5,19 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import org.cflgraph.cfl.CFLGraph.Edge;
-import org.cflgraph.cfl.CFLGraph.EdgeData;
-import org.cflgraph.cfl.FlowsToGraph;
-import org.cflgraph.cfl.TaintFlowGraph;
+import org.cflgraph.groupcfl.FlowsToCFL;
+import org.cflgraph.groupcfl.GroupCFL.Edge;
+import org.cflgraph.groupcfl.TaintFlowCFL;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
-public class Main {
-	
-	public static FlowsToGraph getInput(BufferedReader input) throws IOException {
-		// graph
-		FlowsToGraph graph = new FlowsToGraph();
+public class Main {	
+	public static Map<Edge,Integer> getInput(BufferedReader input) throws IOException {
+		Map<Edge,Integer> edges = new HashMap<Edge,Integer>();
+		Set<String> fields = new HashSet<String>();
 		
 		// stub method arguments
 		MultivalueMap<String,String> methodArgs = new MultivalueMap<String,String>();
@@ -32,23 +32,23 @@ public class Main {
 
 				String label = null;
 				if(tokens[2].startsWith("new")) {
-					label = graph.getNew();
+					label = "new";
 				} else if(tokens[2].startsWith("load_")) {
 					String field = tokens[2].substring(5);
-					graph.addField(field);
-					label = graph.getLoad(field);
+					fields.add(field);
+					label = "load_" + field;
 				} else if(tokens[2].startsWith("store_")) {
 					String field = tokens[2].substring(6);
-					graph.addField(field);
-					label = graph.getStore(field);
+					fields.add(field);
+					label = "store_" + field;
 				} else if(tokens[2].startsWith("assign")) {
-					label = graph.getAssign();
+					label = "assign";
 				} else if(tokens[2].startsWith("srcFlow")) {
-					label = graph.getSource();
+					label = "source";
 				} else if(tokens[2].startsWith("sinkFlow")) {
-					label = graph.getSink();
+					label = "sink";
 				} else if(tokens[2].startsWith("passThrough")) {
-					label = graph.getPassThrough();
+					label = "passThrough";
 				} else if(tokens[2].startsWith("stubArg")) {
 					//graph.addMethod(tokens[1]);
 					methodArgs.add(tokens[1], tokens[0]);
@@ -58,63 +58,38 @@ public class Main {
 					label = null;
 				}
 				if(label != null) {
-					graph.addEdge(source, sink, label);
+					edges.put(new Edge(source, sink, label), 0);
 				}
 			}
 		}
+		/*
 		for(String methodName : methodArgs.keySet()) {
-			//graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
+			graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
 		}
+		*/
 		
-		return graph;
+		FlowsToCFL flowsToCFL = new FlowsToCFL(fields);
+		flowsToCFL.getClosure(edges);
+		TaintFlowCFL taintFlowCFL = new TaintFlowCFL();
+		taintFlowCFL.getClosure(edges);
+		return edges;
 	}
-	
+
 	public static void main(String[] args) {
 		try {
 			String input = "opengps";
-			FlowsToGraph flowsToGraph = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
-			//PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
+			
 			long time = System.currentTimeMillis();
-			
-			Map<Edge,EdgeData> flowsTo = flowsToGraph.getClosure();
-			for(Map.Entry<Edge,EdgeData> entry : flowsTo.entrySet()) {
-				if(entry.getKey().getElement().equals("flowsTo")) {
-					//pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
-					//System.out.println(edge.getPath(true));
-					//System.out.println();
-				}
-			}
-			//pw.println();
-
-			/*
-
-			TaintFlowGraph taintFlowGraph = flowsToGraph.getTaintFlowGraph();
-			Map<Edge,EdgeData> taintFlow = taintFlowGraph.getClosure();
-			
-			for(Map.Entry<Edge,EdgeData> entry : taintFlow.entrySet()) {
-				if(entry.getKey().getElement().equals("sourceSinkFlow")) {
-					pw.println(entry.getKey() + ", weight: " + entry.getValue().getWeight());
-					//System.out.println(edge.getPath(true));
-					//System.out.println();
-				}
-			}
-			pw.println();
-
-			/*
-			pw.println("Rule counts for pair production rules:");
-
-			for(Map.Entry<BinaryProduction,Integer> entry : flowsToGraph.getBinaryProductionCounts().sortedKeySet()) {
-				pw.println(entry.getKey() + " : " + entry.getValue());
-			}
-			pw.println();
-			pw.println("Rule counts for single production rules:");
-			for(Map.Entry<UnaryProduction,Integer> entry : flowsToGraph.getUnaryProductionCounts().sortedKeySet()) {
-				pw.println(entry.getKey() + " : " + entry.getValue());
-			}
-			*/
-			
-			//pw.close();
+			Map<Edge,Integer> edges = getInput(new BufferedReader(new FileReader("input/" + input + ".dat")));
 			System.out.println("time: " + (System.currentTimeMillis() - time));
+			
+			PrintWriter pw = new PrintWriter("output/" + input + ".knuth");
+			for(Edge edge : edges.keySet()) {
+				if(edge.getElement().equals("sourceSinkFlow")) {
+					pw.println(edge.toString());
+				}
+			}
+			pw.close();
 			
 		} catch(Exception e) {
 			e.printStackTrace();

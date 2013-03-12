@@ -142,6 +142,10 @@ public class Utility {
 		private List<Pair<T,Integer>> heap = new ArrayList<Pair<T,Integer>>();
 		private Map<T,Integer> positions = new HashMap<T,Integer>();
 		
+		public int getPriority(T t) {
+			return this.heap.get(this.positions.get(t)).getY();
+		}
+		
 		public void push(T t, int priority) {
 			this.positions.put(t, this.heap.size());
 			this.heap.add(new Pair<T,Integer>(t,priority));
@@ -171,11 +175,12 @@ public class Utility {
 			return this.heap.isEmpty();
 		}
 		
+		// TODO: only update if the priority is lower
 		public void update(T t, int priority) {
 			Integer i = this.positions.get(t);
 			if(i == null) {
 				this.push(t, priority);
-			} else {				
+			} else {
 				// save old priority
 				int prevPriority = this.heap.get(i).getY();
 				
