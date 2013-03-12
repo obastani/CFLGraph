@@ -14,7 +14,24 @@ import org.cflgraph.groupcfl.GroupCFL.Edge;
 import org.cflgraph.groupcfl.TaintFlowCFL;
 import org.cflgraph.utility.Utility.MultivalueMap;
 
-public class Main {	
+public class Main {
+	public static Map<Edge,Integer> getStubMethodEdges(Set<String> args, String ret, String methodName) {
+		Map<Edge,Integer> edges = new HashMap<Edge,Integer>();
+		for(String firstArg : args) {
+			for(String secondArg : args) {
+				if(!firstArg.equals(secondArg)) {
+					edges.put(new Edge(firstArg, secondArg, "passThrough"), 1);
+				}
+			}
+		}
+		if(ret != null) {
+			for(String arg : args) {
+				edges.put(new Edge(arg, ret, "passThrough"), 1);
+			}
+		}
+		return edges;
+	}
+	
 	public static Map<Edge,Integer> getInput(BufferedReader input) throws IOException {
 		Map<Edge,Integer> edges = new HashMap<Edge,Integer>();
 		Set<String> fields = new HashSet<String>();
@@ -62,11 +79,11 @@ public class Main {
 				}
 			}
 		}
-		/*
 		for(String methodName : methodArgs.keySet()) {
-			graph.addStubMethod(methodArgs.get(methodName), methodRet.get(methodName), methodName);
+			for(Map.Entry<Edge,Integer> entry : getStubMethodEdges(methodArgs.get(methodName), methodRet.get(methodName), methodName).entrySet()) {
+				edges.put(entry.getKey(), entry.getValue());
+			}
 		}
-		*/
 		
 		FlowsToCFL flowsToCFL = new FlowsToCFL(fields);
 		flowsToCFL.getClosure(edges);

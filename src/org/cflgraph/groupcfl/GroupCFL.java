@@ -148,7 +148,6 @@ public class GroupCFL {
 	
 	// TODO: fix edge weights in worklist
 	public void getClosure(Map<Edge,Integer> edges) {
-		int i = 0;
 		// Step 1: setup the graph, its group graphs, and the heap of elements
 		Graph graph = new Graph();
 		Heap<Edge> worklist = new Heap<Edge>();
@@ -157,6 +156,7 @@ public class GroupCFL {
 		}
 		
 		// Step 2: process edges in the heap
+		int i = 0;
 		while(!worklist.isEmpty()) {
 			// printing
 			if(++i%10000 == 0) System.out.println(i);
